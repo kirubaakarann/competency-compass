@@ -1,6 +1,5 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash
-from models.department import Department
-from extensions import db
+from models.models import db, Department
 
 departments = Blueprint('departments', __name__, url_prefix='/departments')
 
