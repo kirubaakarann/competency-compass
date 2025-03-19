@@ -9,6 +9,8 @@ from routes.employees import employees
 from routes.assessments import assessments
 from routes.development_plans import development_plans
 from routes.ai_recommendations import ai_recommendations
+from routes.departments import departments
+
 import os
 from dotenv import load_dotenv
 
@@ -30,6 +32,7 @@ app.register_blueprint(employees, url_prefix='/employees')
 app.register_blueprint(assessments, url_prefix='/assessments')
 app.register_blueprint(development_plans, url_prefix='/development-plans')
 app.register_blueprint(ai_recommendations, url_prefix='/ai-recommendations')
+app.register_blueprint(departments, url_prefix='/departments')
 
 @app.route('/')
 def index():
