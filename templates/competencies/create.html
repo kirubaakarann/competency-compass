@@ -18,11 +18,11 @@
         </div>
         
         <div class="mb-3">
-            <label for="department_id" class="form-label">Department</label>
-            <select class="form-select" id="department_id" name="department_id" required>
-                <option value="">Select Department</option>
-                {% for department in departments %}
-                    <option value="{{ department.id }}">{{ department.name }}</option>
+            <label for="category" class="form-label">Category</label>
+            <select class="form-select" id="category" name="category" required>
+                <option value="">Select Category</option>
+                {% for category in categories %}
+                    <option value="{{ category }}">{{ category }}</option>
                 {% endfor %}
             </select>
         </div>
@@ -31,50 +31,18 @@
             <h3 class="mt-4 mb-3">Competency Behaviors</h3>
             <p class="text-muted">Define behaviors that demonstrate this competency at different levels.</p>
             
-            <div class="card mb-3">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0">Level 1 - Basic</h5>
-                </div>
-                <div class="card-body">
-                    <textarea class="form-control" name="behaviors[1]" rows="3" placeholder="Describe behaviors at this level..."></textarea>
-                </div>
-            </div>
+            {% set level_names = {1: 'Basic', 2: 'Intermediate', 3: 'Proficient', 4: 'Advanced', 5: 'Expert'} %}
             
-            <div class="card mb-3">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0">Level 2 - Intermediate</h5>
+            {% for level in range(1, 6) %}
+                <div class="card mb-3">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Level {{ level }} - {{ level_names[level] }}</h5>
+                    </div>
+                    <div class="card-body">
+                        <textarea class="form-control" name="level{{ level }}_behavior" rows="3" placeholder="Describe behaviors at this level..."></textarea>
+                    </div>
                 </div>
-                <div class="card-body">
-                    <textarea class="form-control" name="behaviors[2]" rows="3" placeholder="Describe behaviors at this level..."></textarea>
-                </div>
-            </div>
-            
-            <div class="card mb-3">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0">Level 3 - Proficient</h5>
-                </div>
-                <div class="card-body">
-                    <textarea class="form-control" name="behaviors[3]" rows="3" placeholder="Describe behaviors at this level..."></textarea>
-                </div>
-            </div>
-            
-            <div class="card mb-3">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0">Level 4 - Advanced</h5>
-                </div>
-                <div class="card-body">
-                    <textarea class="form-control" name="behaviors[4]" rows="3" placeholder="Describe behaviors at this level..."></textarea>
-                </div>
-            </div>
-            
-            <div class="card mb-3">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0">Level 5 - Expert</h5>
-                </div>
-                <div class="card-body">
-                    <textarea class="form-control" name="behaviors[5]" rows="3" placeholder="Describe behaviors at this level..."></textarea>
-                </div>
-            </div>
+            {% endfor %}
         </div>
         
         <div class="mt-4">
