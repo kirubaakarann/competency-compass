@@ -1,0 +1,196 @@
+{% extends "layout.html" %}
+
+{% block title %}{{ employee.first_name }} {{ employee.last_name }} - Employee{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>{{ employee.first_name }} {{ employee.last_name }}</h1>
+        <div>
+            <a href="{{ url_for('employees.edit', id=employee.id) }}" class="btn btn-primary">Edit</a>
+            <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
+                Delete
+            </button>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Employee Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <strong>ID:</strong> {{ employee.id }}
+                    </div>
+                    <div class="mb-3">
+                        <strong>Email:</strong> {{ employee.email }}
+                    </div>
+                    <div class="mb-3">
+                        <strong>Department:</strong> {{ employee.department.name }}
+                    </div>
+                    <div class="mb-3">
+                        <strong>Job Role:</strong> {{ employee.job_role.title }}
+                    </div>
+                    <div class="mb-3">
+                        <strong>Hire Date:</strong> {{ employee.hire_date.strftime('%Y-%m-%d') if employee.hire_date else 'Not specified' }}
+                    </div>
+                    <div class="mb-3">
+                        <strong>Created:</strong> {{ employee.created_at.strftime('%Y-%m-%d %H:%M:%S') if employee.created_at }}
+                    </div>
+                    <div class="mb-3">
+                        <strong>Last Updated:</strong> {{ employee.updated_at.strftime('%Y-%m-%d %H:%M:%S') if employee.updated_at }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">Required Competencies</h5>
+                </div>
+                <div class="card-body">
+                    {% if employee.job_role.role_competencies %}
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Competency</th>
+                                        <th>Required Level</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for role_competency in employee.job_role.role_competencies %}
+                                        <tr>
+                                            <td>{{ role_competency.competency.name }}</td>
+                                            <td>{{ role_competency.required_level }}</td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <p class="text-muted">No competencies defined for this job role.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Assessments Section -->
+    <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="card-title mb-0">Assessments</h5>
+            <a href="{{ url_for('assessments.create') }}" class="btn btn-sm btn-outline-primary">Create Assessment</a>
+        </div>
+        <div class="card-body">
+            {% if employee.assessments %}
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Assessor</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for assessment in employee.assessments %}
+                                <tr>
+                                    <td>{{ assessment.assessment_date.strftime('%Y-%m-%d') }}</td>
+                                    <td>
+                                        {% if assessment.assessor %}
+                                            {{ assessment.assessor.first_name }} {{ assessment.assessor.last_name }}
+                                        {% else %}
+                                            Self-assessment
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <span class="badge {% if assessment.status == 'completed' %}bg-success{% elif assessment.status == 'in_progress' %}bg-warning{% else %}bg-secondary{% endif %}">
+                                            {{ assessment.status|replace('_', ' ')|capitalize }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <a href="{{ url_for('assessments.show', id=assessment.id) }}" class="btn btn-sm btn-outline-primary">View</a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p class="text-muted">No assessments for this employee yet.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Development Plans Section -->
+    <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="card-title mb-0">Development Plans</h5>
+            <a href="{{ url_for('development_plans.create') }}" class="btn btn-sm btn-outline-primary">Create Plan</a>
+        </div>
+        <div class="card-body">
+            {% if employee.development_plans %}
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Title</th>
+                                <th>Start Date</th>
+                                <th>End Date</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for plan in employee.development_plans %}
+                                <tr>
+                                    <td>{{ plan.title }}</td>
+                                    <td>{{ plan.start_date.strftime('%Y-%m-%d') }}</td>
+                                    <td>{{ plan.end_date.strftime('%Y-%m-%d') }}</td>
+                                    <td>
+                                        <span class="badge {% if plan.status == 'completed' %}bg-success{% elif plan.status == 'active' %}bg-primary{% else %}bg-secondary{% endif %}">
+                                            {{ plan.status|capitalize }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <a href="{{ url_for('development_plans.show', id=plan.id) }}" class="btn btn-sm btn-outline-primary">View</a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p class="text-muted">No development plans for this employee yet.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteModalLabel">Confirm Delete</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you want to delete the employee <strong>{{ employee.first_name }} {{ employee.last_name }}</strong>?</p>
+                    <p class="text-danger">This action cannot be undone. All related data (assessments, development plans) will also be deleted.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <form action="{{ url_for('employees.delete', id=employee.id) }}" method="POST">
+                        <button type="submit" class="btn btn-danger">Delete</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
