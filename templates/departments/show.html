@@ -1,0 +1,134 @@
+{% extends "layout.html" %}
+
+{% block title %}{{ department.name }} - Department{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>{{ department.name }}</h1>
+        <div>
+            <a href="{{ url_for('departments.edit', id=department.id) }}" class="btn btn-primary">Edit</a>
+            <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
+                Delete
+            </button>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="card-title mb-0">Department Details</h5>
+        </div>
+        <div class="card-body">
+            <div class="mb-3">
+                <strong>Name:</strong> {{ department.name }}
+            </div>
+            <div class="mb-3">
+                <strong>Description:</strong>
+                <p>{{ department.description if department.description else 'No description provided.' }}</p>
+            </div>
+            <div class="mb-3">
+                <strong>Created:</strong> {{ department.created_at.strftime('%Y-%m-%d %H:%M:%S') if department.created_at }}
+            </div>
+            <div class="mb-3">
+                <strong>Last Updated:</strong> {{ department.updated_at.strftime('%Y-%m-%d %H:%M:%S') if department.updated_at }}
+            </div>
+        </div>
+    </div>
+
+    <!-- Employees Section -->
+    <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="card-title mb-0">Employees</h5>
+            <a href="#" class="btn btn-sm btn-outline-primary">Add Employee</a>
+        </div>
+        <div class="card-body">
+            {% if department.employees %}
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Job Role</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for employee in department.employees %}
+                                <tr>
+                                    <td>{{ employee.first_name }} {{ employee.last_name }}</td>
+                                    <td>{{ employee.email }}</td>
+                                    <td>{{ employee.job_role.title }}</td>
+                                    <td>
+                                        <a href="#" class="btn btn-sm btn-outline-primary">View</a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p class="text-muted">No employees in this department yet.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Competencies Section -->
+    <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="card-title mb-0">Competencies</h5>
+            <a href="#" class="btn btn-sm btn-outline-primary">Add Competency</a>
+        </div>
+        <div class="card-body">
+            {% if department.competencies %}
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Description</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for competency in department.competencies %}
+                                <tr>
+                                    <td>{{ competency.name }}</td>
+                                    <td>{{ competency.description[:50] + '...' if competency.description and competency.description|length > 50 else competency.description or 'No description' }}</td>
+                                    <td>
+                                        <a href="#" class="btn btn-sm btn-outline-primary">View</a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p class="text-muted">No competencies defined for this department yet.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteModalLabel">Confirm Delete</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you want to delete the department <strong>{{ department.name }}</strong>?</p>
+                    <p class="text-danger">This action cannot be undone. All related data will also be deleted.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <form action="{{ url_for('departments.delete', id=department.id) }}" method="POST">
+                        <button type="submit" class="btn btn-danger">Delete</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
