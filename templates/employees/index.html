@@ -1,121 +1,81 @@
-{% extends "base.html" %}
+{% extends "layout.html" %}
 
 {% block title %}Employees{% endblock %}
 
 {% block content %}
-<div class="container mx-auto px-4 py-8">
-    <div class="flex justify-between items-center mb-6">
-        <h1 class="text-2xl font-bold">Employees</h1>
-        <a href="{{ url_for('employees.create') }}" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded">
-            Add New Employee
-        </a>
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Employees</h1>
+        <a href="{{ url_for('employees.create') }}" class="btn btn-primary">Create Employee</a>
     </div>
 
-    <div class="bg-white shadow-md rounded-lg overflow-hidden">
-        <div class="p-4 border-b">
-            <input type="text" id="employee-search" placeholder="Search employees..." 
-                  class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+    <div class="card">
+        <div class="card-body">
+            {% if employees %}
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Department</th>
+                                <th>Job Role</th>
+                                <th>Hire Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for employee in employees %}
+                                <tr>
+                                    <td>{{ employee.id }}</td>
+                                    <td>{{ employee.first_name }} {{ employee.last_name }}</td>
+                                    <td>{{ employee.email }}</td>
+                                    <td>{{ employee.department.name }}</td>
+                                    <td>{{ employee.job_role.title }}</td>
+                                    <td>{{ employee.hire_date.strftime('%Y-%m-%d') if employee.hire_date else 'Not specified' }}</td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <a href="{{ url_for('employees.show', id=employee.id) }}" class="btn btn-sm btn-outline-primary">View</a>
+                                            <a href="{{ url_for('employees.edit', id=employee.id) }}" class="btn btn-sm btn-outline-secondary">Edit</a>
+                                            <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteModal{{ employee.id }}">
+                                                Delete
+                                            </button>
+                                        </div>
+
+                                        <!-- Delete Modal for each employee -->
+                                        <div class="modal fade" id="deleteModal{{ employee.id }}" tabindex="-1" aria-labelledby="deleteModalLabel{{ employee.id }}" aria-hidden="true">
+                                            <div class="modal-dialog">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title" id="deleteModalLabel{{ employee.id }}">Confirm Delete</h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <p>Are you sure you want to delete the employee <strong>{{ employee.first_name }} {{ employee.last_name }}</strong>?</p>
+                                                        <p class="text-danger">This action cannot be undone. All related data (assessments, development plans) will also be deleted.</p>
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                                        <form action="{{ url_for('employees.delete', id=employee.id) }}" method="POST">
+                                                            <button type="submit" class="btn btn-danger">Delete</button>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="alert alert-info" role="alert">
+                    No employees found. Click the "Create Employee" button to add your first employee.
+                </div>
+            {% endif %}
         </div>
-        
-        <table class="min-w-full">
-            <thead class="bg-gray-100">
-                <tr>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Job Role</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Department</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Hire Date</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                </tr>
-            </thead>
-            <tbody class="divide-y divide-gray-200" id="employee-table-body">
-                {% for employee in employees %}
-                <tr class="employee-row">
-                    <td class="px-6 py-4 whitespace-nowrap">
-                        <div class="flex items-center">
-                            <div class="flex-shrink-0 h-10 w-10 rounded-full bg-gray-300 flex items-center justify-center">
-                                <span class="text-lg font-medium text-gray-700 employee-initial">{{ employee.name[:1] }}</span>
-                            </div>
-                            <div class="ml-4">
-                                <div class="text-sm font-medium text-gray-900 employee-name">{{ employee.name }}</div>
-                            </div>
-                        </div>
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap employee-email">
-                        {{ employee.email }}
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap employee-job-role">
-                        {{ employee.job_role.title }}
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap employee-department">
-                        {{ employee.job_role.department.name }}
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap">
-                        {% if employee.hire_date %}
-                            {{ employee.hire_date.strftime('%b %d, %Y') }}
-                        {% else %}
-                            <span class="text-gray-400">Not set</span>
-                        {% endif %}
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap">
-                        <a href="{{ url_for('employees.view', id=employee.id) }}" class="text-blue-600 hover:text-blue-900 mr-2">View</a>
-                        <a href="{{ url_for('employees.edit', id=employee.id) }}" class="text-blue-600 hover:text-blue-900 mr-2">Edit</a>
-                        <a href="{{ url_for('assessments.create', employee_id=employee.id) }}" class="text-green-600 hover:text-green-900">Assess</a>
-                    </td>
-                </tr>
-                {% endfor %}
-                
-                {% if not employees %}
-                <tr>
-                    <td colspan="6" class="px-6 py-4 text-center text-gray-500">No employees found. Add an employee to get started.</td>
-                </tr>
-                {% endif %}
-                
-                <!-- No results row (hidden by default) -->
-                <tr id="no-results-row" class="hidden">
-                    <td colspan="6" class="px-6 py-4 text-center text-gray-500">No employees match your search.</td>
-                </tr>
-            </tbody>
-        </table>
     </div>
 </div>
-{% endblock %}
-
-{% block scripts %}
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const searchInput = document.getElementById('employee-search');
-        const employeeRows = document.querySelectorAll('.employee-row');
-        const noResultsRow = document.getElementById('no-results-row');
-        
-        searchInput.addEventListener('keyup', function() {
-            const searchTerm = this.value.toLowerCase();
-            let visibleCount = 0;
-            
-            employeeRows.forEach(row => {
-                const name = row.querySelector('.employee-name').textContent.toLowerCase();
-                const email = row.querySelector('.employee-email').textContent.toLowerCase();
-                const jobRole = row.querySelector('.employee-job-role').textContent.toLowerCase();
-                const department = row.querySelector('.employee-department').textContent.toLowerCase();
-                
-                if (name.includes(searchTerm) || 
-                    email.includes(searchTerm) || 
-                    jobRole.includes(searchTerm) || 
-                    department.includes(searchTerm)) {
-                    row.classList.remove('hidden');
-                    visibleCount++;
-                } else {
-                    row.classList.add('hidden');
-                }
-            });
-            
-            // Show "no results" message if needed
-            if (visibleCount === 0 && employeeRows.length > 0) {
-                noResultsRow.classList.remove('hidden');
-            } else {
-                noResultsRow.classList.add('hidden');
-            }
-        });
-    });
-</script>
 {% endblock %}
