@@ -1,179 +1,152 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash
-from models import Employee, JobRole, Competency, RoleCompetency, Assessment, db
-from sqlalchemy.exc import SQLAlchemyError
-from sqlalchemy import func
+from models.models import db, Department, JobRole, Employee
 from datetime import datetime
 
-employees = Blueprint('employees', __name__)
+employees = Blueprint('employees', __name__, url_prefix='/employees')
 
 @employees.route('/')
 def index():
+    """Display all employees."""
     employees = Employee.query.all()
     return render_template('employees/index.html', employees=employees)
 
-@employees.route('/create')
+@employees.route('/create', methods=['GET'])
 def create():
+    """Show form to create a new employee."""
+    # Get all departments and job roles to populate the dropdown menus
+    departments = Department.query.all()
     job_roles = JobRole.query.all()
-    job_role_id = request.args.get('job_role_id', None, type=int)
     
     return render_template('employees/create.html', 
-                           job_roles=job_roles,
-                           selected_job_role_id=job_role_id)
+                           departments=departments, 
+                           job_roles=job_roles)
 
-@employees.route('/store', methods=['POST'])
+@employees.route('/', methods=['POST'])
 def store():
+    """Store a new employee."""
+    first_name = request.form.get('first_name')
+    last_name = request.form.get('last_name')
+    email = request.form.get('email')
+    department_id = request.form.get('department_id')
+    job_role_id = request.form.get('job_role_id')
+    hire_date_str = request.form.get('hire_date')
+    
+    # Form validation
+    if not all([first_name, last_name, email, department_id, job_role_id]):
+        flash('All fields except hire date are required', 'danger')
+        return redirect(url_for('employees.create'))
+    
+    # Convert hire_date to datetime object if provided
+    hire_date = None
+    if hire_date_str:
+        try:
+            hire_date = datetime.strptime(hire_date_str, '%Y-%m-%d').date()
+        except ValueError:
+            flash('Invalid date format. Please use YYYY-MM-DD format.', 'danger')
+            return redirect(url_for('employees.create'))
+    
+    # Check if email is already in use
+    if Employee.query.filter_by(email=email).first():
+        flash('Email address is already in use', 'danger')
+        return redirect(url_for('employees.create'))
+    
+    # Create a new employee
+    employee = Employee(
+        first_name=first_name,
+        last_name=last_name,
+        email=email,
+        department_id=department_id,
+        job_role_id=job_role_id,
+        hire_date=hire_date
+    )
+    
     try:
-        name = request.form['name']
-        email = request.form['email']
-        job_role_id = request.form['job_role_id']
-        hire_date = datetime.strptime(request.form['hire_date'], '%Y-%m-%d').date() if request.form['hire_date'] else None
-        
-        # Create new employee
-        employee = Employee(
-            name=name,
-            email=email,
-            job_role_id=job_role_id,
-            hire_date=hire_date
-        )
-        
         db.session.add(employee)
         db.session.commit()
-        
-        flash('Employee created successfully!', 'success')
-        return redirect(url_for('employees.view', id=employee.id))
-    
-    except SQLAlchemyError as e:
+        flash('Employee created successfully', 'success')
+        return redirect(url_for('employees.index'))
+    except Exception as e:
         db.session.rollback()
-        flash(f'Error creating employee: {str(e)}', 'error')
+        flash(f'Error creating employee: {str(e)}', 'danger')
         return redirect(url_for('employees.create'))
 
-@employees.route('/<int:id>')
-def view(id):
+@employees.route('/<int:id>', methods=['GET'])
+def show(id):
+    """Show a specific employee."""
     employee = Employee.query.get_or_404(id)
-    job_role = employee.job_role
-    
-    # Get competency requirements for the job role
-    role_competencies = RoleCompetency.query.filter_by(job_role_id=job_role.id).all()
-    
-    # Get most recent assessment if exists
-    latest_assessment = Assessment.query.filter_by(employee_id=id).order_by(Assessment.assessment_date.desc()).first()
-    
-    # Initialize competency data structure
-    competency_data = []
-    for rc in role_competencies:
-        competency_info = {
-            'id': rc.competency_id,
-            'name': rc.competency.name,
-            'required_level': rc.required_level,
-            'weight': rc.weight,
-            'current_level': 0  # Default if no assessment
-        }
-        
-        # Add current level if assessment exists
-        if latest_assessment:
-            for rating in latest_assessment.ratings:
-                if rating.competency_id == rc.competency_id:
-                    competency_info['current_level'] = rating.rating
-                    competency_info['evidence'] = rating.evidence
-                    break
-        
-        competency_data.append(competency_info)
-    
-    # Get all assessments for this employee
-    assessments = Assessment.query.filter_by(employee_id=id).order_by(Assessment.assessment_date.desc()).all()
-    
-    return render_template('employees/view.html', 
-                           employee=employee, 
-                           job_role=job_role,
-                           competency_data=competency_data,
-                           latest_assessment=latest_assessment,
-                           assessments=assessments)
+    return render_template('employees/show.html', employee=employee)
 
-@employees.route('/<int:id>/edit')
+@employees.route('/<int:id>/edit', methods=['GET'])
 def edit(id):
+    """Show form to edit an employee."""
     employee = Employee.query.get_or_404(id)
+    departments = Department.query.all()
     job_roles = JobRole.query.all()
     
     return render_template('employees/edit.html', 
-                           employee=employee, 
+                           employee=employee,
+                           departments=departments,
                            job_roles=job_roles)
 
-@employees.route('/<int:id>/update', methods=['POST'])
+@employees.route('/<int:id>', methods=['POST'])
 def update(id):
+    """Update a specific employee."""
+    employee = Employee.query.get_or_404(id)
+    
+    first_name = request.form.get('first_name')
+    last_name = request.form.get('last_name')
+    email = request.form.get('email')
+    department_id = request.form.get('department_id')
+    job_role_id = request.form.get('job_role_id')
+    hire_date_str = request.form.get('hire_date')
+    
+    # Form validation
+    if not all([first_name, last_name, email, department_id, job_role_id]):
+        flash('All fields except hire date are required', 'danger')
+        return redirect(url_for('employees.edit', id=id))
+    
+    # Check if email is already in use by another employee
+    existing_employee = Employee.query.filter_by(email=email).first()
+    if existing_employee and existing_employee.id != id:
+        flash('Email address is already in use by another employee', 'danger')
+        return redirect(url_for('employees.edit', id=id))
+    
+    # Convert hire_date to datetime object if provided
+    hire_date = None
+    if hire_date_str:
+        try:
+            hire_date = datetime.strptime(hire_date_str, '%Y-%m-%d').date()
+        except ValueError:
+            flash('Invalid date format. Please use YYYY-MM-DD format.', 'danger')
+            return redirect(url_for('employees.edit', id=id))
+    
     try:
-        employee = Employee.query.get_or_404(id)
-        
-        employee.name = request.form['name']
-        employee.email = request.form['email']
-        employee.job_role_id = request.form['job_role_id']
-        employee.hire_date = datetime.strptime(request.form['hire_date'], '%Y-%m-%d').date() if request.form['hire_date'] else None
+        employee.first_name = first_name
+        employee.last_name = last_name
+        employee.email = email
+        employee.department_id = department_id
+        employee.job_role_id = job_role_id
+        employee.hire_date = hire_date
         
         db.session.commit()
-        
-        flash('Employee updated successfully!', 'success')
-        return redirect(url_for('employees.view', id=id))
-    
-    except SQLAlchemyError as e:
+        flash('Employee updated successfully', 'success')
+        return redirect(url_for('employees.show', id=id))
+    except Exception as e:
         db.session.rollback()
-        flash(f'Error updating employee: {str(e)}', 'error')
+        flash(f'Error updating employee: {str(e)}', 'danger')
         return redirect(url_for('employees.edit', id=id))
 
 @employees.route('/<int:id>/delete', methods=['POST'])
 def delete(id):
+    """Delete a specific employee."""
+    employee = Employee.query.get_or_404(id)
+    
     try:
-        employee = Employee.query.get_or_404(id)
-        
-        # Check if employee has assessments
-        assessment_count = Assessment.query.filter_by(employee_id=id).count()
-        if assessment_count > 0:
-            flash(f'Cannot delete employee. There are {assessment_count} assessments associated with this employee.', 'error')
-            return redirect(url_for('employees.view', id=id))
-        
-        # Delete employee
         db.session.delete(employee)
         db.session.commit()
-        
-        flash('Employee deleted successfully!', 'success')
+        flash('Employee deleted successfully', 'success')
         return redirect(url_for('employees.index'))
-    
-    except SQLAlchemyError as e:
+    except Exception as e:
         db.session.rollback()
-        flash(f'Error deleting employee: {str(e)}', 'error')
-        return redirect(url_for('employees.view', id=id))
-
-@employees.route('/<int:id>/competency-radar')
-def competency_radar(id):
-    employee = Employee.query.get_or_404(id)
-    job_role = employee.job_role
-    
-    # Get competency requirements for the job role
-    role_competencies = RoleCompetency.query.filter_by(job_role_id=job_role.id).all()
-    
-    # Get most recent assessment if exists
-    latest_assessment = Assessment.query.filter_by(employee_id=id).order_by(Assessment.assessment_date.desc()).first()
-    
-    # Build data for radar chart
-    labels = []
-    required_data = []
-    current_data = []
-    
-    for rc in role_competencies:
-        labels.append(rc.competency.name)
-        required_data.append(rc.required_level)
-        
-        # Get current level if assessment exists
-        current_level = 0
-        if latest_assessment:
-            for rating in latest_assessment.ratings:
-                if rating.competency_id == rc.competency_id:
-                    current_level = rating.rating
-                    break
-        
-        current_data.append(current_level)
-    
-    return render_template('employees/competency_radar.html',
-                          employee=employee,
-                          job_role=job_role,
-                          labels=labels,
-                          required_data=required_data,
-                          current_data=current_data)
+        flash(f'Error deleting employee: {str(e)}', 'danger')
+        return redirect(url_for('employees.show', id=id))
