@@ -99,8 +99,17 @@ class Employee(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
-    # Relationships
-    assessments = db.relationship('Assessment', backref='employee', lazy=True)
+    # Fix for the ambiguous relationship - specify foreign keys
+    assessments = db.relationship('Assessment', 
+                                 foreign_keys='Assessment.employee_id',
+                                 backref='employee', 
+                                 lazy=True)
+    
+    conducted_assessments = db.relationship('Assessment',
+                                          foreign_keys='Assessment.assessor_id',
+                                          backref='assessor',
+                                          lazy=True)
+    
     development_plans = db.relationship('DevelopmentPlan', backref='employee', lazy=True)
 
 class Assessment(db.Model):
@@ -116,9 +125,8 @@ class Assessment(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
-    # Relationships
+    # Relationships - remove the duplicate relationships that are now defined in Employee model
     ratings = db.relationship('AssessmentRating', backref='assessment', lazy=True, cascade='all, delete-orphan')
-    assessor = db.relationship('Employee', foreign_keys=[assessor_id], backref='conducted_assessments')
 
 class AssessmentRating(db.Model):
     """AssessmentRating model for storing individual competency ratings in an assessment"""
