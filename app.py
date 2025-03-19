@@ -1,5 +1,5 @@
 from flask import Flask, render_template, redirect, url_for, flash, session
-from models import db, Department, Competency, JobRole, Employee
+from models.models import db, Department, Competency, JobRole, Employee
 from routes.job_roles import job_roles
 from routes.competencies import competencies
 from routes.employees import employees
