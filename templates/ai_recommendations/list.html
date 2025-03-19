@@ -1,0 +1,194 @@
+{% extends "base.html" %}
+
+{% block title %}Recommendations for {{ employee.name }}{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-2xl font-bold">Development Recommendations for {{ employee.name }}</h1>
+        <div>
+            <a href="{{ url_for('ai_recommendations.index') }}" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded mr-2">
+                Back
+            </a>
+            <a href="{{ url_for('ai_recommendations.generate', employee_id=employee.id) }}" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">
+                Generate New
+            </a>
+        </div>
+    </div>
+
+    <div class="bg-white shadow-md rounded-lg p-6 mb-8">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between">
+            <div class="mb-4 md:mb-0">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 h-12 w-12 rounded-full bg-gray-300 flex items-center justify-center">
+                        <span class="text-lg font-medium text-gray-700">{{ employee.name[:1] }}</span>
+                    </div>
+                    <div class="ml-4">
+                        <h2 class="text-xl font-bold">{{ employee.name }}</h2>
+                        <p class="text-gray-600">{{ employee.job_role.title }} - {{ employee.job_role.department.name }}</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="flex flex-col items-end">
+                <a href="{{ url_for('employees.view', id=employee.id) }}" class="text-blue-500 hover:text-blue-700">
+                    View Employee Profile
+                </a>
+                <a href="{{ url_for('development_plans.create', employee_id=employee.id) }}" class="text-blue-500 hover:text-blue-700 mt-1">
+                    Create Development Plan
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    {% if grouped_recommendations %}
+        <div class="mb-8">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold">Personalized Development Recommendations</h2>
+                <input type="text" id="recommendation-search" placeholder="Filter recommendations..." 
+                      class="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+            
+            <div class="space-y-8" id="recommendations-container">
+                {% for competency_id, group in grouped_recommendations.items() %}
+                    <div class="competency-group">
+                        <div class="bg-gray-100 p-4 rounded-t-lg">
+                            <h3 class="font-bold text-lg">{{ group.competency.name }}</h3>
+                            <p class="text-sm text-gray-600">{{ group.competency.category }}</p>
+                        </div>
+                        
+                        <div class="bg-white shadow-md rounded-b-lg overflow-hidden">
+                            <div class="divide-y divide-gray-200">
+                                {% for recommendation in group.recommendations %}
+                                    <div class="p-6 recommendation-item">
+                                        <div class="flex justify-between items-start">
+                                            <div class="flex items-start">
+                                                <div class="flex-shrink-0">
+                                                    <div class="w-10 h-10 rounded-full flex items-center justify-center
+                                                                {% if recommendation.recommendation_type == 'Training Course' %}bg-blue-100 text-blue-800
+                                                                {% elif recommendation.recommendation_type == 'Book/Article' %}bg-purple-100 text-purple-800
+                                                                {% elif recommendation.recommendation_type == 'Practical Exercise' %}bg-green-100 text-green-800
+                                                                {% elif recommendation.recommendation_type == 'Mentoring' %}bg-yellow-100 text-yellow-800
+                                                                {% else %}bg-indigo-100 text-indigo-800{% endif %}">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                            {% if recommendation.recommendation_type == 'Training Course' %}
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                                                            {% elif recommendation.recommendation_type == 'Book/Article' %}
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                                                            {% elif recommendation.recommendation_type == 'Practical Exercise' %}
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                                                            {% elif recommendation.recommendation_type == 'Mentoring' %}
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                                                            {% else %}
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
+                                                            {% endif %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.getElementById('recommendation-search');
+        if (!searchInput) return; // Exit if no search input (happens if no recommendations)
+        
+        const recommendationItems = document.querySelectorAll('.recommendation-item');
+        const competencyGroups = document.querySelectorAll('.competency-group');
+        const noResultsMessage = document.getElementById('no-results-message');
+        
+        searchInput.addEventListener('keyup', function() {
+            const searchTerm = this.value.toLowerCase();
+            let totalVisible = 0;
+            
+            // Track visible recommendations per competency group
+            const visibleItemsPerGroup = {};
+            
+            // First pass: mark items as visible or hidden
+            recommendationItems.forEach(item => {
+                const type = item.querySelector('.recommendation-type').textContent.toLowerCase();
+                const content = item.querySelector('.recommendation-content').textContent.toLowerCase();
+                
+                const isVisible = type.includes(searchTerm) || content.includes(searchTerm);
+                
+                if (isVisible) {
+                    item.classList.remove('hidden');
+                    totalVisible++;
+                    
+                    // Get the competency group this item belongs to
+                    const group = item.closest('.competency-group');
+                    const groupId = Array.from(competencyGroups).indexOf(group);
+                    
+                    // Increment visible count for this group
+                    visibleItemsPerGroup[groupId] = (visibleItemsPerGroup[groupId] || 0) + 1;
+                } else {
+                    item.classList.add('hidden');
+                }
+            });
+            
+            // Second pass: hide/show competency groups based on their visible items
+            competencyGroups.forEach((group, index) => {
+                if (visibleItemsPerGroup[index] && visibleItemsPerGroup[index] > 0) {
+                    group.classList.remove('hidden');
+                } else {
+                    group.classList.add('hidden');
+                }
+            });
+            
+            // Show "no results" message if needed
+            if (totalVisible === 0) {
+                noResultsMessage.classList.remove('hidden');
+            } else {
+                noResultsMessage.classList.add('hidden');
+            }
+        });
+    });
+</script>
+{% endblock %}
+                                                        </svg>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="ml-4 flex-grow">
+                                                    <p class="font-medium recommendation-type">{{ recommendation.recommendation_type }}</p>
+                                                    <p class="text-gray-600 mt-1 recommendation-content">{{ recommendation.content }}</p>
+                                                    <p class="text-xs text-gray-500 mt-2">Generated on {{ recommendation.created_at.strftime('%b %d, %Y') }}</p>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="ml-4 flex-shrink-0">
+                                                {% if recommendation.is_applied %}
+                                                    <span class="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded">Applied</span>
+                                                {% else %}
+                                                    <form action="{{ url_for('ai_recommendations.apply', recommendation_id=recommendation.id) }}" method="POST">
+                                                        <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white text-xs font-bold py-1 px-2 rounded">
+                                                            Apply
+                                                        </button>
+                                                    </form>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+                
+                <!-- No results message (hidden by default) -->
+                <div id="no-results-message" class="hidden bg-white shadow-md rounded-lg p-8 text-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <h3 class="text-lg font-semibold text-gray-600 mb-2">No matching recommendations found</h3>
+                    <p class="text-gray-500">Try adjusting your search or generate new recommendations.</p>
+                </div>
+            </div>
+        </div>
+    {% else %}
+        <div class="bg-white shadow-md rounded-lg p-8 text-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+            </svg>
+            <h3 class="text-xl font-semibold text-gray-700 mb-2">No Recommendations Available</h3>
+            <p class="text-gray-500 mb-6">There are no AI-generated recommendations for this employee yet.</p>
+            <a href="{{ url_for('ai_recommendations.generate', employee_id=employee.id) }}" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">
+                Generate Recommendations
+            </a>
+        </div>

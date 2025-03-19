@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+
+{% block title %}Assessments{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-2xl font-bold">Assessments</h1>
+        <a href="{{ url_for('assessments.create') }}" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded">
+            Create New Assessment
+        </a>
+    </div>
+
+    <div class="bg-white shadow-md rounded-lg overflow-hidden">
+        <div class="p-4 border-b">
+            <input type="text" id="assessment-search" placeholder="Search assessments..." 
+                  class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+        
+        <table class="min-w-full">
+            <thead class="bg-gray-100">
+                <tr>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Employee</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Job Role</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Assessor</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Competencies</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200" id="assessment-table-body">
+                {% for assessment in assessments %}
+                <tr class="assessment-row">
+                    <td class="px-6 py-4 whitespace-nowrap assessment-date">
+                        {{ assessment.assessment_date.strftime('%b %d, %Y') }}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0 h-8 w-8 rounded-full bg-gray-300 flex items-center justify-center">
+                                <span class="text-sm font-medium text-gray-700 assessment-employee-initial">{{ assessment.employee.name[:1] }}</span>
+                            </div>
+                            <div class="ml-3">
+                                <div class="text-sm font-medium text-gray-900 assessment-employee-name">{{ assessment.employee.name }}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap assessment-job-role">
+                        {{ assessment.employee.job_role.title }}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap assessment-assessor">
+                        {{ assessment.assessor.name }}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="flex items-center">
+                            <span class="mr-2">{{ assessment.ratings|length }}</span>
+                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+                                {% set avg_rating = assessment.ratings|sum(attribute='rating') / assessment.ratings|length if assessment.ratings else 0 %}
+                                Avg: {{ avg_rating|round(1) }}
+                            </span>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <a href="{{ url_for('assessments.view', id=assessment.id) }}" class="text-blue-600 hover:text-blue-900 mr-2">View</a>
+                        <a href="{{ url_for('assessments.edit', id=assessment.id) }}" class="text-blue-600 hover:text-blue-900">Edit</a>
+                    </td>
+                </tr>
+                {% endfor %}
+                
+                {% if not assessments %}
+                <tr>
+                    <td colspan="6" class="px-6 py-4 text-center text-gray-500">No assessments found. Create one to get started.</td>
+                </tr>
+                {% endif %}
+                
+                <!-- No results row (hidden by default) -->
+                <tr id="no-results-row" class="hidden">
+                    <td colspan="6" class="px-6 py-4 text-center text-gray-500">No assessments match your search.</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.getElementById('assessment-search');
+        const assessmentRows = document.querySelectorAll('.assessment-row');
+        const noResultsRow = document.getElementById('no-results-row');
+        
+        searchInput.addEventListener('keyup', function() {
+            const searchTerm = this.value.toLowerCase();
+            let visibleCount = 0;
+            
+            assessmentRows.forEach(row => {
+                const date = row.querySelector('.assessment-date').textContent.toLowerCase();
+                const employee = row.querySelector('.assessment-employee-name').textContent.toLowerCase();
+                const jobRole = row.querySelector('.assessment-job-role').textContent.toLowerCase();
+                const assessor = row.querySelector('.assessment-assessor').textContent.toLowerCase();
+                
+                if (date.includes(searchTerm) || 
+                    employee.includes(searchTerm) || 
+                    jobRole.includes(searchTerm) || 
+                    assessor.includes(searchTerm)) {
+                    row.classList.remove('hidden');
+                    visibleCount++;
+                } else {
+                    row.classList.add('hidden');
+                }
+            });
+            
+            // Show "no results" message if needed
+            if (visibleCount === 0 && assessmentRows.length > 0) {
+                noResultsRow.classList.remove('hidden');
+            } else {
+                noResultsRow.classList.add('hidden');
+            }
+        });
+    });
+</script>
+{% endblock %}

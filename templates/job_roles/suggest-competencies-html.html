@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+
+{% block title %}Suggested Competencies - Competency Compass AI{% endblock %}
+
+{% block header %}Suggested Competencies for {{ job_role.title }}{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="alert alert-info">
+            <p>Based on the job title and description, we've suggested the following competencies. Please review and adjust as needed.</p>
+        </div>
+    </div>
+</div>
+
+<form method="POST" action="{{ url_for('suggest_competencies', job_role_id=job_role.id) }}">
+    <div class="card mb-4">
+        <div class="card-header bg-success text-white">
+            <h5 class="mb-0">AI-Suggested Competencies</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th style="width: 50px;">Select</th>
+                            <th>Competency</th>
+                            <th>Description</th>
+                            <th style="width: 150px;">Required Level (1-5)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for suggestion in suggestions %}
+                        <tr>
+                            <td>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="competency" value="{{ suggestion.id }}|{{ suggestion.recommended_level }}" id="comp{{ suggestion.id }}" checked>
+                                </div>
+                            </td>
+                            <td>{{ suggestion.name }}</td>
+                            <td>{{ suggestion.description }}</td>
+                            <td>
+                                <select class="form-select" name="level_{{ suggestion.id }}" 
+                                        onchange="document.getElementById('comp{{ suggestion.id }}').value = '{{ suggestion.id }}|' + this.value">
+                                    {% for level in range(1, 6) %}
+                                    <option value="{{ level }}" {% if level == suggestion.recommended_level %}selected{% endif %}>
+                                        Level {{ level }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <div class="card mb-4">
+        <div class="card-header">
+            <a class="btn btn-sm btn-outline-primary" data-bs-toggle="collapse" href="#additionalCompetencies">
+                Add Additional Competencies
+            </a>
+        </div>
+        <div class="collapse" id="additionalCompetencies">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th style="width: 50px;">Select</th>
+                                <th>Competency</th>
+                                <th>Description</th>
+                                <th style="width: 150px;">Required Level (1-5)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for competency in all_competencies %}
+                            <tr>
+                                <td>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="competency" value="{{ competency.id }}|3" id="compAdd{{ competency.id }}">
+                                    </div>
+                                </td>
+                                <td>{{ competency.name }}</td>
+                                <td>{{ competency.description }}</td>
+                                <td>
+                                    <select class="form-select" name="levelAdd_{{ competency.id }}"
+                                            onchange="document.getElementById('compAdd{{ competency.id }}').value = '{{ competency.id }}|' + this.value">
+                                        {% for level in range(1, 6) %}
+                                        <option value="{{ level }}" {% if level == 3 %}selected{% endif %}>
+                                            Level {{ level }}
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="mb-3">
+        <div class="alert alert-light border">
+            <small>
+                <strong>Level 1:</strong> Basic Awareness - Understands basic concepts<br>
+                <strong>Level 2:</strong> Novice - Can perform basic tasks with guidance<br>
+                <strong>Level 3:</strong> Competent - Works independently on routine tasks<br>
+                <strong>Level 4:</strong> Proficient - Advanced knowledge and skills<br>
+                <strong>Level 5:</strong> Expert - Authoritative knowledge, sets standards
+            </small>
+        </div>
+    </div>
+    
+    <div class="d-flex justify-content-between">
+        <a href="{{ url_for('list_job_roles') }}" class="btn btn-secondary">Cancel</a>
+        <button type="submit" class="btn btn-primary">Save Competencies</button>
+    </div>
+</form>
+{% endblock %}

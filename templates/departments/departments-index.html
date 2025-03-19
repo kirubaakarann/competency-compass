@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block title %}Departments{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-2xl font-bold">Departments</h1>
+        <a href="{{ url_for('departments.create') }}" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded">
+            Create New Department
+        </a>
+    </div>
+
+    <div class="bg-white shadow-md rounded-lg overflow-hidden">
+        <table class="min-w-full">
+            <thead class="bg-gray-100">
+                <tr>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Job Roles</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+                {% for department in departments %}
+                <tr>
+                    <td class="px-6 py-4 whitespace-nowrap font-medium">{{ department.name }}</td>
+                    <td class="px-6 py-4">
+                        <div class="truncate max-w-xs">{{ department.description }}</div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">{{ department.job_roles|length }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <a href="{{ url_for('departments.view', id=department.id) }}" class="text-blue-600 hover:text-blue-900 mr-4">View</a>
+                        <a href="{{ url_for('departments.edit', id=department.id) }}" class="text-blue-600 hover:text-blue-900">Edit</a>
+                    </td>
+                </tr>
+                {% endfor %}
+                
+                {% if not departments %}
+                <tr>
+                    <td colspan="4" class="px-6 py-4 text-center text-gray-500">No departments found. Create one to get started.</td>
+                </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

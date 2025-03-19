@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block title %}Job Roles - Competency Compass AI{% endblock %}
+
+{% block header %}Job Roles{% endblock %}
+
+{% block content %}
+<div class="mb-3">
+    <a href="{{ url_for('create_job_role') }}" class="btn btn-primary">Create New Job Role</a>
+</div>
+
+{% if job_roles %}
+<div class="table-responsive">
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Title</th>
+                <th>Description</th>
+                <th>Taxonomy</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for job_role in job_roles %}
+            <tr>
+                <td>{{ job_role.id }}</td>
+                <td>{{ job_role.title }}</td>
+                <td>{{ job_role.description|truncate(50) }}</td>
+                <td>{{ job_role.taxonomy_used }}</td>
+                <td>
+                    <a href="{{ url_for('view_job_role', job_role_id=job_role.id) }}" class="btn btn-sm btn-info">View</a>
+                    <a href="{{ url_for('suggest_competencies', job_role_id=job_role.id) }}" class="btn btn-sm btn-secondary">Edit Competencies</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="alert alert-info">
+    No job roles have been created yet. <a href="{{ url_for('create_job_role') }}">Create one now</a>.
+</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+
+{% block title %}Add Employee{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-2xl font-bold">Add New Employee</h1>
+        <div>
+            <a href="{{ url_for('employees.index') }}" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded mr-2">
+                Cancel
+            </a>
+            <button type="submit" form="employee-form" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">
+                Create
+            </button>
+        </div>
+    </div>
+
+    <div class="bg-white shadow-md rounded-lg p-6">
+        <form id="employee-form" method="POST" action="{{ url_for('employees.store') }}">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label for="name" class="block text-gray-700 font-bold mb-2">Full Name</label>
+                    <input type="text" id="name" name="name" required
+                           class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                </div>
+                
+                <div>
+                    <label for="email" class="block text-gray-700 font-bold mb-2">Email Address</label>
+                    <input type="email" id="email" name="email" required
+                           class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                </div>
+                
+                <div>
+                    <label for="job_role_id" class="block text-gray-700 font-bold mb-2">Job Role</label>
+                    <select id="job_role_id" name="job_role_id" required
+                            class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                        <option value="">Select a job role</option>
+                        {% for job_role in job_roles %}
+                            <option value="{{ job_role.id }}" {% if job_role.id == selected_job_role_id %}selected{% endif %}>
+                                {{ job_role.title }} ({{ job_role.department.name }})
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div>
+                    <label for="hire_date" class="block text-gray-700 font-bold mb-2">Hire Date</label>
+                    <input type="date" id="hire_date" name="hire_date"
+                           class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                </div>
+            </div>
+            
+            <div class="mt-8 p-4 bg-blue-50 rounded-lg">
+                <h2 class="text-lg font-bold text-blue-800 mb-2">Next Steps</h2>
+                <p class="text-blue-700 mb-4">
+                    After creating this employee, you'll be able to assess their competencies and create development plans to help them grow.
+                </p>
+                <div class="flex items-center text-blue-700">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span>All job roles have predefined competency requirements that will be used for assessments.</span>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
