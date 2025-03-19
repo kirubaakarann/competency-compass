@@ -1,48 +1,79 @@
-{% extends "base.html" %}
+{% extends "layout.html" %}
 
 {% block title %}Departments{% endblock %}
 
 {% block content %}
-<div class="container mx-auto px-4 py-8">
-    <div class="flex justify-between items-center mb-6">
-        <h1 class="text-2xl font-bold">Departments</h1>
-        <a href="{{ url_for('departments.create') }}" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded">
-            Create New Department
-        </a>
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Departments</h1>
+        <a href="{{ url_for('departments.create') }}" class="btn btn-primary">Create Department</a>
     </div>
 
-    <div class="bg-white shadow-md rounded-lg overflow-hidden">
-        <table class="min-w-full">
-            <thead class="bg-gray-100">
-                <tr>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Job Roles</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                </tr>
-            </thead>
-            <tbody class="divide-y divide-gray-200">
-                {% for department in departments %}
-                <tr>
-                    <td class="px-6 py-4 whitespace-nowrap font-medium">{{ department.name }}</td>
-                    <td class="px-6 py-4">
-                        <div class="truncate max-w-xs">{{ department.description }}</div>
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap">{{ department.job_roles|length }}</td>
-                    <td class="px-6 py-4 whitespace-nowrap">
-                        <a href="{{ url_for('departments.view', id=department.id) }}" class="text-blue-600 hover:text-blue-900 mr-4">View</a>
-                        <a href="{{ url_for('departments.edit', id=department.id) }}" class="text-blue-600 hover:text-blue-900">Edit</a>
-                    </td>
-                </tr>
-                {% endfor %}
-                
-                {% if not departments %}
-                <tr>
-                    <td colspan="4" class="px-6 py-4 text-center text-gray-500">No departments found. Create one to get started.</td>
-                </tr>
-                {% endif %}
-            </tbody>
-        </table>
+    <div class="card">
+        <div class="card-body">
+            {% if departments %}
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Description</th>
+                                <th>Employees</th>
+                                <th>Competencies</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for department in departments %}
+                                <tr>
+                                    <td>{{ department.id }}</td>
+                                    <td>{{ department.name }}</td>
+                                    <td>{{ department.description[:50] + '...' if department.description and department.description|length > 50 else department.description or 'No description' }}</td>
+                                    <td>{{ department.employees|length if department.employees else 0 }}</td>
+                                    <td>{{ department.competencies|length if department.competencies else 0 }}</td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <a href="{{ url_for('departments.show', id=department.id) }}" class="btn btn-sm btn-outline-primary">View</a>
+                                            <a href="{{ url_for('departments.edit', id=department.id) }}" class="btn btn-sm btn-outline-secondary">Edit</a>
+                                            <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteModal{{ department.id }}">
+                                                Delete
+                                            </button>
+                                        </div>
+
+                                        <!-- Delete Modal for each department -->
+                                        <div class="modal fade" id="deleteModal{{ department.id }}" tabindex="-1" aria-labelledby="deleteModalLabel{{ department.id }}" aria-hidden="true">
+                                            <div class="modal-dialog">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title" id="deleteModalLabel{{ department.id }}">Confirm Delete</h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <p>Are you sure you want to delete the department <strong>{{ department.name }}</strong>?</p>
+                                                        <p class="text-danger">This action cannot be undone. All related data will also be deleted.</p>
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                                        <form action="{{ url_for('departments.delete', id=department.id) }}" method="POST">
+                                                            <button type="submit" class="btn btn-danger">Delete</button>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="alert alert-info" role="alert">
+                    No departments found. Click the "Create Department" button to add your first department.
+                </div>
+            {% endif %}
+        </div>
     </div>
 </div>
 {% endblock %}
