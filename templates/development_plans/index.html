@@ -1,65 +1,103 @@
-{% extends "base.html" %}
+{% extends "layout.html" %}
 
-{% block title %}Competency Compass AI - Home{% endblock %}
-
-{% block header %}Welcome to Competency Compass AI{% endblock %}
+{% block title %}Development Plans{% endblock %}
 
 {% block content %}
-<div class="row mb-4">
-    <div class="col-12">
-        <div class="p-4 bg-light rounded">
-            <h3>Competency Management Made Easy</h3>
-            <p class="lead">Identify, assess, and bridge competency gaps in your organization with AI-powered recommendations.</p>
-        </div>
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Development Plans</h1>
+        <a href="{{ url_for('development_plans.create') }}" class="btn btn-primary">Create Development Plan</a>
     </div>
-</div>
 
-<div class="row mb-4">
-    <div class="col-md-4">
-        <div class="card h-100">
-            <div class="card-body text-center">
-                <h1 class="display-4">{{ job_roles_count }}</h1>
-                <h5>Job Roles</h5>
-                <p>Define roles and required competencies</p>
-                <a href="{{ url_for('list_job_roles') }}" class="btn btn-primary">Manage Job Roles</a>
+    <!-- Quick Links -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Quick Links</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex flex-wrap gap-2">
+                        <a href="{{ url_for('employees.index') }}" class="btn btn-outline-primary">Manage Employees</a>
+                        <a href="{{ url_for('competencies.index') }}" class="btn btn-outline-primary">Manage Competencies</a>
+                        <a href="{{ url_for('job_roles.index') }}" class="btn btn-outline-primary">Manage Job Roles</a>
+                        <a href="{{ url_for('assessments.index') }}" class="btn btn-outline-primary">View Assessments</a>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
-    <div class="col-md-4">
-        <div class="card h-100">
-            <div class="card-body text-center">
-                <h1 class="display-4">{{ employees_count }}</h1>
-                <h5>Employees</h5>
-                <p>Track employee competencies and skills</p>
-                <a href="{{ url_for('list_employees') }}" class="btn btn-primary">Manage Employees</a>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-4">
-        <div class="card h-100">
-            <div class="card-body text-center">
-                <h1 class="display-4">{{ competencies_count }}</h1>
-                <h5>Competencies</h5>
-                <p>From our competency taxonomy</p>
-                <a href="{{ url_for('gap_analysis') }}" class="btn btn-success">Perform Gap Analysis</a>
-            </div>
-        </div>
-    </div>
-</div>
 
-<div class="row">
-    <div class="col-12">
-        <div class="card">
-            <div class="card-header">
-                Quick Start Guide
-            </div>
-            <div class="card-body">
-                <ol>
-                    <li>Start by <a href="{{ url_for('create_job_role') }}">creating a job role</a> and defining required competencies.</li>
-                    <li>Next, <a href="{{ url_for('create_employee') }}">add an employee</a> and assess their current competencies.</li>
-                    <li>Finally, run a <a href="{{ url_for('gap_analysis') }}">gap analysis</a> to identify training needs.</li>
-                </ol>
-            </div>
+    <div class="card">
+        <div class="card-body">
+            {% if development_plans %}
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Employee</th>
+                                <th>Title</th>
+                                <th>Start Date</th>
+                                <th>End Date</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for plan in development_plans %}
+                                <tr>
+                                    <td>{{ plan.id }}</td>
+                                    <td>{{ plan.employee.first_name }} {{ plan.employee.last_name }}</td>
+                                    <td>{{ plan.title }}</td>
+                                    <td>{{ plan.start_date.strftime('%Y-%m-%d') }}</td>
+                                    <td>{{ plan.end_date.strftime('%Y-%m-%d') }}</td>
+                                    <td>
+                                        <span class="badge {% if plan.status == 'completed' %}bg-success{% elif plan.status == 'active' %}bg-primary{% else %}bg-warning{% endif %}">
+                                            {{ plan.status|capitalize }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <a href="{{ url_for('development_plans.show', id=plan.id) }}" class="btn btn-sm btn-outline-primary">View</a>
+                                            <a href="{{ url_for('development_plans.edit', id=plan.id) }}" class="btn btn-sm btn-outline-secondary">Edit</a>
+                                            <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteModal{{ plan.id }}">
+                                                Delete
+                                            </button>
+                                        </div>
+
+                                        <!-- Delete Modal -->
+                                        <div class="modal fade" id="deleteModal{{ plan.id }}" tabindex="-1" aria-labelledby="deleteModalLabel{{ plan.id }}" aria-hidden="true">
+                                            <div class="modal-dialog">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title" id="deleteModalLabel{{ plan.id }}">Confirm Delete</h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <p>Are you sure you want to delete the development plan <strong>{{ plan.title }}</strong>?</p>
+                                                        <p class="text-danger">This action cannot be undone. All related development actions will also be deleted.</p>
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                                        <form action="{{ url_for('development_plans.delete', id=plan.id) }}" method="POST">
+                                                            <button type="submit" class="btn btn-danger">Delete</button>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="alert alert-info" role="alert">
+                    No development plans found. Click the "Create Development Plan" button to add your first development plan.
+                </div>
+            {% endif %}
         </div>
     </div>
 </div>
