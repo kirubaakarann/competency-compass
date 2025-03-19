@@ -1,0 +1,31 @@
+competency_compass/
+├── app.py                 # Main Flask application
+├── config.py              # Configuration settings
+├── models/
+│   └── __init__.py
+│   └── models.py          # SQLite database models
+├── services/
+│   └── __init__.py
+│   └── ai_service.py      # Basic AI model for competency suggestions
+│   └── gap_analysis.py    # Gap analysis logic
+├── static/
+│   └── css/
+│       └── styles.css     # Basic styling
+│   └── js/
+│       └── main.js        # Client-side JavaScript
+├── templates/
+│   └── base.html          # Base template
+│   └── index.html         # Homepage
+│   └── job_roles/
+│       └── create.html    # Create job role page
+│       └── list.html      # List job roles page
+│   └── employees/
+│       └── create.html    # Create employee page
+│       └── list.html      # List employees page
+│       └── competencies.html  # Update employee competencies
+│   └── gap_analysis/
+│       └── analysis.html  # Gap analysis page
+├── data/
+│   └── taxonomy.json      # Simplified SFIA taxonomy data
+│   └── training.json      # Sample training resources
+└── requirements.txt       # Project dependencies

@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block title %}Job Roles{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-2xl font-bold">Job Roles</h1>
+        <a href="{{ url_for('job_roles.create') }}" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded">
+            Create New Job Role
+        </a>
+    </div>
+
+    <div class="bg-white shadow-md rounded-lg overflow-hidden">
+        <table class="min-w-full">
+            <thead class="bg-gray-100">
+                <tr>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Department</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Competencies</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Employees</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+                {% for job_role in job_roles %}
+                <tr>
+                    <td class="px-6 py-4 whitespace-nowrap font-medium">{{ job_role.title }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">{{ job_role.department.name }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">{{ job_role.competencies|length }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">{{ job_role.employees|length }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <a href="{{ url_for('job_roles.view', id=job_role.id) }}" class="text-blue-600 hover:text-blue-900 mr-4">View</a>
+                        <a href="{{ url_for('job_roles.edit', id=job_role.id) }}" class="text-blue-600 hover:text-blue-900">Edit</a>
+                    </td>
+                </tr>
+                {% endfor %}
+                
+                {% if not job_roles %}
+                <tr>
+                    <td colspan="5" class="px-6 py-4 text-center text-gray-500">No job roles found. Create one to get started.</td>
+                </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

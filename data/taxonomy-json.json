@@ -1,0 +1,125 @@
+{
+  "taxonomy_name": "Simplified SFIA",
+  "competencies": [
+    {
+      "id": 1,
+      "name": "Software Development",
+      "description": "Design, creation, testing and documentation of new and amended software components and systems.",
+      "taxonomy": "Simplified SFIA",
+      "default_level": 3,
+      "keywords": ["coding", "programming", "development", "software", "developer"]
+    },
+    {
+      "id": 2,
+      "name": "Data Analysis",
+      "description": "The investigation, evaluation, interpretation and classification of data to create actionable insights.",
+      "taxonomy": "Simplified SFIA",
+      "default_level": 3,
+      "keywords": ["data", "analysis", "analytics", "statistics", "insights"]
+    },
+    {
+      "id": 3,
+      "name": "UI/UX Design",
+      "description": "The design of user interfaces and experiences for digital products and services.",
+      "taxonomy": "Simplified SFIA",
+      "default_level": 3,
+      "keywords": ["ui", "ux", "design", "interface", "usability", "user experience"]
+    },
+    {
+      "id": 4,
+      "name": "Project Management",
+      "description": "The planning, monitoring and control of projects.",
+      "taxonomy": "Simplified SFIA",
+      "default_level": 4,
+      "keywords": ["project", "management", "planning", "coordination", "agile", "scrum"]
+    },
+    {
+      "id": 5,
+      "name": "Information Security",
+      "description": "The protection of information systems from unauthorized access, use, disclosure, disruption, modification, or destruction.",
+      "taxonomy": "Simplified SFIA",
+      "default_level": 3,
+      "keywords": ["security", "cybersecurity", "infosec", "protection", "privacy"]
+    },
+    {
+      "id": 6,
+      "name": "Database Design",
+      "description": "The specification, design and maintenance of database structures and data models.",
+      "taxonomy": "Simplified SFIA",
+      "default_level": 3,
+      "keywords": ["database", "sql", "data modeling", "schema", "dbms"]
+    },
+    {
+      "id": 7,
+      "name": "Testing",
+      "description": "The planning, design, and execution of tests to determine whether systems and software work according to specifications.",
+      "taxonomy": "Simplified SFIA",
+      "default_level": 2,
+      "keywords": ["testing", "qa", "quality assurance", "test cases", "unit testing"]
+    },
+    {
+      "id": 8,
+      "name": "DevOps",
+      "description": "The integration of development and operations through practices, tools, and culture.",
+      "taxonomy": "Simplified SFIA",
+      "default_level": 3,
+      "keywords": ["devops", "continuous integration", "ci/cd", "automation", "deployment"]
+    },
+    {
+      "id": 9,
+      "name": "Problem Management",
+      "description": "The identification, resolution, and prevention of incidents and problems.",
+      "taxonomy": "Simplified SFIA",
+      "default_level": 3,
+      "keywords": ["problem solving", "troubleshooting", "incident", "resolution", "root cause"]
+    },
+    {
+      "id": 10,
+      "name": "Network Infrastructure",
+      "description": "The design, implementation, and management of network infrastructure components and systems.",
+      "taxonomy": "Simplified SFIA",
+      "default_level": 3,
+      "keywords": ["network", "infrastructure", "routing", "switching", "tcp/ip"]
+    },
+    {
+      "id": 11,
+      "name": "Business Analysis",
+      "description": "The investigation, analysis, review and documentation of business processes and requirements.",
+      "taxonomy": "Simplified SFIA",
+      "default_level": 4,
+      "keywords": ["business analysis", "requirements", "process", "workflow", "stakeholder"]
+    },
+    {
+      "id": 12,
+      "name": "Communication Skills",
+      "description": "Effectively conveying information to team members and stakeholders.",
+      "taxonomy": "Simplified SFIA",
+      "default_level": 3,
+      "keywords": ["communication", "presentation", "documentation", "reporting", "speaking"]
+    },
+    {
+      "id": 13,
+      "name": "Machine Learning",
+      "description": "Development of algorithms and systems that can learn from and make decisions based on data.",
+      "taxonomy": "Simplified SFIA",
+      "default_level": 4,
+      "keywords": ["machine learning", "ml", "ai", "algorithms", "deep learning", "neural networks"]
+    },
+    {
+      "id": 14,
+      "name": "Cloud Services",
+      "description": "The configuration, deployment, and management of cloud-based services and infrastructure.",
+      "taxonomy": "Simplified SFIA",
+      "default_level": 3,
+      "keywords": ["cloud", "aws", "azure", "gcp", "saas", "paas", "iaas"]
+    },
+    {
+      "id": 15,
+      "name": "Mobile Development",
+      "description": "The development of applications for mobile devices.",
+      "taxonomy": "Simplified SFIA",
+      "default_level": 3,
+      "keywords": ["mobile", "android", "ios", "app development", "responsive"]
+    }
+  ]
+}

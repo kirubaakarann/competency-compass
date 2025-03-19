@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block title %}Competency Compass AI - Home{% endblock %}
+
+{% block header %}Welcome to Competency Compass AI{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="p-4 bg-light rounded">
+            <h3>Competency Management Made Easy</h3>
+            <p class="lead">Identify, assess, and bridge competency gaps in your organization with AI-powered recommendations.</p>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <h1 class="display-4">{{ job_roles_count }}</h1>
+                <h5>Job Roles</h5>
+                <p>Define roles and required competencies</p>
+                <a href="{{ url_for('list_job_roles') }}" class="btn btn-primary">Manage Job Roles</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <h1 class="display-4">{{ employees_count }}</h1>
+                <h5>Employees</h5>
+                <p>Track employee competencies and skills</p>
+                <a href="{{ url_for('list_employees') }}" class="btn btn-primary">Manage Employees</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <h1 class="display-4">{{ competencies_count }}</h1>
+                <h5>Competencies</h5>
+                <p>From our competency taxonomy</p>
+                <a href="{{ url_for('gap_analysis') }}" class="btn btn-success">Perform Gap Analysis</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                Quick Start Guide
+            </div>
+            <div class="card-body">
+                <ol>
+                    <li>Start by <a href="{{ url_for('create_job_role') }}">creating a job role</a> and defining required competencies.</li>
+                    <li>Next, <a href="{{ url_for('create_employee') }}">add an employee</a> and assess their current competencies.</li>
+                    <li>Finally, run a <a href="{{ url_for('gap_analysis') }}">gap analysis</a> to identify training needs.</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

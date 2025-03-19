@@ -1,0 +1,230 @@
+{% extends "base.html" %}
+
+{% block title %}Generate Recommendations{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-2xl font-bold">Generate Recommendations for {{ employee.name }}</h1>
+        <div>
+            <a href="{{ url_for('ai_recommendations.index') }}" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded mr-2">
+                Back
+            </a>
+            <a href="{{ url_for('ai_recommendations.employee_recommendations', employee_id=employee.id) }}" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">
+                View All Recommendations
+            </a>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+        <div class="bg-white shadow-md rounded-lg p-6">
+            <h2 class="text-xl font-bold mb-4">Employee Profile</h2>
+            <div class="flex flex-col">
+                <div class="mb-4">
+                    <p class="text-gray-600 text-sm">Name</p>
+                    <p class="font-semibold">{{ employee.name }}</p>
+                </div>
+                <div class="mb-4">
+                    <p class="text-gray-600 text-sm">Email</p>
+                    <p class="font-semibold">{{ employee.email }}</p>
+                </div>
+                <div class="mb-4">
+                    <p class="text-gray-600 text-sm">Job Role</p>
+                    <p class="font-semibold">{{ job_role.title }}</p>
+                </div>
+                <div>
+                    <p class="text-gray-600 text-sm">Department</p>
+                    <p class="font-semibold">{{ job_role.department.name }}</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="lg:col-span-2 bg-white shadow-md rounded-lg p-6">
+            <h2 class="text-xl font-bold mb-4">AI Analysis Summary</h2>
+            <div class="mb-4">
+                <p>Based on current assessments and required competencies for <strong>{{ job_role.title }}</strong>, we've identified the following competency gaps:</p>
+            </div>
+            
+            {% if competency_gaps %}
+                <div class="mb-6">
+                    <p class="text-sm text-gray-600 mb-2">Prioritized by importance and gap size:</p>
+                    <div class="space-y-2">
+                        {% for gap in competency_gaps %}
+                            <div class="flex items-center">
+                                <div class="w-8 h-8 rounded-full flex items-center justify-center 
+                                            {% if gap.gap > 2 %}bg-red-100 text-red-800
+                                            {% elif gap.gap > 1 %}bg-yellow-100 text-yellow-800
+                                            {% else %}bg-blue-100 text-blue-800{% endif %}">
+                                    {{ loop.index }}
+                                </div>
+                                <div class="ml-3 flex-grow">
+                                    <div class="flex justify-between">
+                                        <p class="font-medium">{{ gap.competency_name }}</p>
+                                        <p class="text-sm">
+                                            <span class="font-medium">Current:</span> {{ gap.current_level }}/5
+                                            <span class="font-medium ml-2">Required:</span> {{ gap.required_level }}/5
+                                        </p>
+                                    </div>
+                                    <div class="w-full bg-gray-200 rounded-full h-2.5 mt-2">
+                                        <div class="bg-blue-600 h-2.5 rounded-full" style="width: {{ gap.current_level * 20 }}%"></div>
+                                        <div class="float-right h-6 relative" style="width: {{ (5 - gap.required_level) * 20 }}%; margin-top: -6px; margin-right:0;">
+                                            <div class="absolute right-0 w-0.5 h-6 bg-red-400" style="margin-top: -6px; margin-right:0;"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% else %}
+                <div class="mb-6 p-4 bg-green-100 text-green-800 rounded-lg">
+                    <p>Great news! {{ employee.name }} is meeting or exceeding all required competency levels for their role.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    {% if competency_gaps %}
+        <h2 class="text-xl font-bold mb-4">Generate Personalized Recommendations</h2>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+            {% for gap in competency_gaps %}
+                <div class="bg-white shadow-md rounded-lg p-6" id="competency-card-{{ gap.competency_id }}">
+                    <div class="flex justify-between items-start mb-4">
+                        <h3 class="text-lg font-bold">{{ gap.competency_name }}</h3>
+                        <span class="bg-blue-100 text-blue-800 font-semibold px-3 py-1 rounded-full text-sm">
+                            Gap: {{ gap.gap }}
+                        </span>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <p class="text-sm text-gray-600 mb-1">Current level: {{ gap.current_level }}/5</p>
+                        <p class="text-sm text-gray-600 mb-2">Required level: {{ gap.required_level }}/5</p>
+                        <div class="w-full bg-gray-200 rounded-full h-2.5">
+                            <div class="bg-blue-600 h-2.5 rounded-full" style="width: {{ gap.current_level * 20 }}%"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <button type="button" class="generate-btn w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded mb-2"
+                                data-employee-id="{{ employee.id }}" data-competency-id="{{ gap.competency_id }}">
+                            Generate Recommendations
+                        </button>
+                    </div>
+                    
+                    <div class="recommendations-container hidden">
+                        <div class="animate-pulse flex space-x-4 mb-4 rec-loading">
+                            <div class="flex-1 space-y-4 py-1">
+                                <div class="h-4 bg-gray-200 rounded w-3/4"></div>
+                                <div class="space-y-2">
+                                    <div class="h-4 bg-gray-200 rounded"></div>
+                                    <div class="h-4 bg-gray-200 rounded w-5/6"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="rec-content hidden">
+                            <!-- Recommendations will be inserted here -->
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const generateButtons = document.querySelectorAll('.generate-btn');
+        
+        generateButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const employeeId = this.getAttribute('data-employee-id');
+                const competencyId = this.getAttribute('data-competency-id');
+                const card = document.getElementById(`competency-card-${competencyId}`);
+                const recContainer = card.querySelector('.recommendations-container');
+                const recLoading = card.querySelector('.rec-loading');
+                const recContent = card.querySelector('.rec-content');
+                
+                // Show loading
+                recContainer.classList.remove('hidden');
+                recLoading.classList.remove('hidden');
+                recContent.classList.add('hidden');
+                this.disabled = true;
+                this.textContent = 'Generating...';
+                
+                // Call API to generate recommendations
+                fetch(`/ai-recommendations/api/generate/${employeeId}/${competencyId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    // Hide loading
+                    recLoading.classList.add('hidden');
+                    
+                    if (data.success) {
+                        // Show recommendations
+                        const recommendations = data.recommendations;
+                        let html = '<h4 class="font-bold text-sm mb-2">Recommended Development Activities:</h4>';
+                        
+                        recommendations.forEach((rec, index) => {
+                            html += `
+                                <div class="mb-4 p-3 bg-gray-50 rounded-lg">
+                                    <div class="flex items-center mb-2">
+                                        <div class="w-6 h-6 rounded-full bg-blue-100 text-blue-800 flex items-center justify-center text-xs font-bold mr-2">
+                                            ${index + 1}
+                                        </div>
+                                        <p class="font-semibold text-sm">${rec.type}</p>
+                                    </div>
+                                    <p class="text-sm">${rec.content}</p>
+                                </div>
+                            `;
+                        });
+                        
+                        html += `
+                            <div class="text-right mt-4">
+                                <a href="${window.location.pathname}/../recommendations/${employeeId}" class="text-blue-500 hover:text-blue-700 text-sm">
+                                    View All Recommendations
+                                </a>
+                            </div>
+                        `;
+                        
+                        recContent.innerHTML = html;
+                        recContent.classList.remove('hidden');
+                        
+                        // Change button
+                        this.textContent = 'Regenerate';
+                        this.disabled = false;
+                    } else {
+                        // Show error
+                        recContent.innerHTML = `
+                            <div class="p-3 bg-red-100 text-red-800 rounded-lg">
+                                <p class="text-sm">Error: ${data.message}</p>
+                            </div>
+                        `;
+                        recContent.classList.remove('hidden');
+                        this.textContent = 'Try Again';
+                        this.disabled = false;
+                    }
+                })
+                .catch(error => {
+                    // Handle error
+                    recLoading.classList.add('hidden');
+                    recContent.innerHTML = `
+                        <div class="p-3 bg-red-100 text-red-800 rounded-lg">
+                            <p class="text-sm">Error: Network or server issue. Please try again.</p>
+                        </div>
+                    `;
+                    recContent.classList.remove('hidden');
+                    this.textContent = 'Try Again';
+                    this.disabled = false;
+                });
+            });
+        });
+    });
+</script>
+{% endblock %}

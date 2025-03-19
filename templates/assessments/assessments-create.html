@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+
+{% block title %}Create Assessment{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-2xl font-bold">Create New Assessment</h1>
+        <div>
+            <a href="{{ url_for('employees.view', id=employee.id) }}" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded mr-2">
+                Cancel
+            </a>
+            <button type="submit" form="assessment-form" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded">
+                Submit Assessment
+            </button>
+        </div>
+    </div>
+
+    <div class="bg-white shadow-md rounded-lg p-6 mb-8">
+        <div class="flex flex-col md:flex-row md:items-center mb-6">
+            <div class="mb-4 md:mb-0 md:mr-8">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 h-12 w-12 rounded-full bg-gray-300 flex items-center justify-center">
+                        <span class="text-lg font-medium text-gray-700">{{ employee.name[:1] }}</span>
+                    </div>
+                    <div class="ml-4">
+                        <h2 class="text-xl font-bold">{{ employee.name }}</h2>
+                        <p class="text-gray-600">{{ job_role.title }} - {{ job_role.department.name }}</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-blue-50 p-3 rounded-lg">
+                <p class="text-blue-700 text-sm">
+                    <span class="font-bold">Note:</span> This assessment will evaluate {{ employee.name }}'s competencies against the requirements for the {{ job_role.title }} role.
+                </p>
+            </div>
+        </div>
+        
+        <form id="assessment-form" method="POST" action="{{ url_for('assessments.store') }}">
+            <input type="hidden" name="employee_id" value="{{ employee.id }}">
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <div>
+                    <label for="assessor_id" class="block text-gray-700 font-bold mb-2">Assessor</label>
+                    <select id="assessor_id" name="assessor_id" required
+                            class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                        <option value="">Select an assessor</option>
+                        {% for assessor in assessors %}
+                            <option value="{{ assessor.id }}">{{ assessor.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div>
+                    <label for="assessment_date" class="block text-gray-700 font-bold mb-2">Assessment Date</label>
+                    <input type="date" id="assessment_date" name="assessment_date" required value="{{ now().strftime('%Y-%m-%d') }}"
+                           class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                </div>
+            </div>
+            
+            <div class="mb-6">
+                <label for="notes" class="block text-gray-700 font-bold mb-2">Notes</label>
+                <textarea id="notes" name="notes" rows="3"
+                         class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"></textarea>
+            </div>
+            
+            <h2 class="text-xl font-bold mb-4">Competency Ratings</h2>
+            
+            {% if role_competencies %}
+                <div class="p-4 mb-4 bg-gray-50 rounded-lg">
+                    <div class="flex flex-col sm:flex-row items-center justify-between mb-2">
+                        <p class="font-medium mb-2 sm:mb-0">Rating Scale</p>
+                        <div class="flex space-x-2">
+                            <span class="bg-red-100 text-red-800 text-xs font-medium px-2 py-1 rounded">1 - Novice</span>
+                            <span class="bg-orange-100 text-orange-800 text-xs font-medium px-2 py-1 rounded">2 - Advanced Beginner</span>
+                            <span class="bg-yellow-100 text-yellow-800 text-xs font-medium px-2 py-1 rounded">3 - Competent</span>
+                            <span class="bg-blue-100 text-blue-800 text-xs font-medium px-2 py-1 rounded">4 - Proficient</span>
+                            <span class="bg-green-100 text-green-800 text-xs font-medium px-2 py-1 rounded">5 - Expert</span>
+                        </div>
+                    </div>
+                </div>
+                
+                {% for rc in role_competencies %}
+                    <div class="border rounded-lg p-6 mb-6">
+                        <input type="hidden" name="competency_id[]" value="{{ rc.competency_id }}">
+                        
+                        <div class="flex justify-between items-start mb-4">
+                            <div>
+                                <h3 class="text-lg font-bold">{{ rc.competency.name }}</h3>
+                                <p class="text-gray-600">{{ rc.competency.description }}</p>
+                            </div>
+                            <div class="flex-shrink-0">
+                                <span class="bg-blue-100 text-blue-800 font-semibold px-3 py-1 rounded-full text-sm">
+                                    Required: {{ rc.required_level }}/5
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <h4 class="font-bold text-sm mb-2">Expected Behaviors (Level {{ rc.required_level }}):</h4>
+                            {% set behaviors = rc.competency.behaviors|selectattr('level', '<=', rc.required_level)|list %}
+                            {% if behaviors %}
+                                <ul class="list-disc list-inside text-sm text-gray-600">
+                                    {% for behavior in behaviors %}
+                                        <li class="mb-1">{{ behavior.description }}</li>
+                                    {% endfor %}
+                                </ul>
+                            {% else %}
+                                <p class="text-sm text-gray-500">No behaviors defined for this level.</p>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label class="block text-gray-700 font-bold mb-2">Rating</label>
+                            <div class="flex items-center">
+                                <input type="range" min="1" max="5" value="3" name="rating[]" 
+                                       class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                                       oninput="this.nextElementSibling.value = this.value">
+                                <output class="text-gray-700 font-bold ml-4 w-8 text-center">3</output>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-gray-700 font-bold mb-2">Evidence/Observations</label>
+                            <textarea name="evidence[]" rows="3" placeholder="Provide specific examples of observed behaviors that support this rating..."
+                                     class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"></textarea>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="bg-yellow-50 p-6 rounded-lg text-center">
+                    <p class="text-yellow-700 mb-4">No competencies have been defined for the {{ job_role.title }} role.</p>
+                    <a href="{{ url_for('job_roles.edit', id=job_role.id) }}" class="text-blue-500 hover:text-blue-700">
+                        Add competencies to this job role
+                    </a>
+                </div>
+            {% endif %}
+        </form>
+    </div>
+</div>
+{% endblock %}

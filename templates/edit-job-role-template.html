@@ -1,0 +1,153 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Job Role{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-2xl font-bold">Edit Job Role</h1>
+        <div>
+            <a href="{{ url_for('job_roles.view', id=job_role.id) }}" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded mr-2">
+                Cancel
+            </a>
+            <button type="submit" form="job-role-form" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">
+                Save Changes
+            </button>
+        </div>
+    </div>
+
+    <div class="bg-white shadow-md rounded-lg p-6">
+        <form id="job-role-form" method="POST" action="{{ url_for('job_roles.update', id=job_role.id) }}">
+            <div class="mb-4">
+                <label for="title" class="block text-gray-700 font-bold mb-2">Job Title</label>
+                <input type="text" id="title" name="title" value="{{ job_role.title }}" required
+                    class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+            </div>
+            
+            <div class="mb-4">
+                <label for="description" class="block text-gray-700 font-bold mb-2">Description</label>
+                <textarea id="description" name="description" rows="4" required
+                    class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">{{ job_role.description }}</textarea>
+            </div>
+            
+            <div class="mb-4">
+                <label for="department" class="block text-gray-700 font-bold mb-2">Department</label>
+                <select id="department" name="department_id" required
+                    class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                    {% for department in departments %}
+                        <option value="{{ department.id }}" {% if department.id == job_role.department_id %}selected{% endif %}>
+                            {{ department.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <h2 class="text-xl font-bold mt-8 mb-4">Competencies</h2>
+            
+            <div id="competencies-container">
+                {% for rc in role_competencies %}
+                <div class="competency-item border rounded-lg p-4 mb-4">
+                    <div class="mb-4">
+                        <label class="block text-gray-700 font-bold mb-2">Competency</label>
+                        <select name="competency_ids[]" required
+                            class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                            {% for competency in competencies %}
+                                <option value="{{ competency.id }}" {% if competency.id == rc.competency_id %}selected{% endif %}>
+                                    {{ competency.name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="block text-gray-700 font-bold mb-2">Required Level</label>
+                        <div class="flex items-center">
+                            <input type="range" min="1" max="5" name="levels[]" value="{{ rc.required_level }}"
+                                class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                                oninput="this.nextElementSibling.value = this.value">
+                            <output class="text-gray-700 font-bold ml-4">{{ rc.required_level }}</output>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="block text-gray-700 font-bold mb-2">Weight</label>
+                        <input type="number" min="1" max="10" name="weights[]" value="{{ rc.weight }}" required
+                            class="shadow appearance-none border rounded w-40 py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                    </div>
+                    
+                    <button type="button" class="remove-competency bg-red-500 hover:bg-red-600 text-white font-bold py-1 px-3 rounded text-sm">
+                        Remove
+                    </button>
+                </div>
+                {% endfor %}
+            </div>
+            
+            <button type="button" id="add-competency" class="mt-4 bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded">
+                Add Competency
+            </button>
+            
+            <div class="hidden" id="competency-template">
+                <div class="competency-item border rounded-lg p-4 mb-4">
+                    <div class="mb-4">
+                        <label class="block text-gray-700 font-bold mb-2">Competency</label>
+                        <select name="competency_ids[]" required
+                            class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                            {% for competency in competencies %}
+                                <option value="{{ competency.id }}">{{ competency.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="block text-gray-700 font-bold mb-2">Required Level</label>
+                        <div class="flex items-center">
+                            <input type="range" min="1" max="5" name="levels[]" value="3"
+                                class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                                oninput="this.nextElementSibling.value = this.value">
+                            <output class="text-gray-700 font-bold ml-4">3</output>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="block text-gray-700 font-bold mb-2">Weight</label>
+                        <input type="number" min="1" max="10" name="weights[]" value="5" required
+                            class="shadow appearance-none border rounded w-40 py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                    </div>
+                    
+                    <button type="button" class="remove-competency bg-red-500 hover:bg-red-600 text-white font-bold py-1 px-3 rounded text-sm">
+                        Remove
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const addButton = document.getElementById('add-competency');
+        const container = document.getElementById('competencies-container');
+        const template = document.getElementById('competency-template');
+        
+        addButton.addEventListener('click', function() {
+            const newItem = template.firstElementChild.cloneNode(true);
+            container.appendChild(newItem);
+            
+            // Setup remove button for the new item
+            setupRemoveButton(newItem.querySelector('.remove-competency'));
+        });
+        
+        // Setup existing remove buttons
+        document.querySelectorAll('.remove-competency').forEach(setupRemoveButton);
+        
+        function setupRemoveButton(button) {
+            button.addEventListener('click', function() {
+                const item = this.closest('.competency-item');
+                item.remove();
+            });
+        }
+    });
+</script>
+{% endblock %}

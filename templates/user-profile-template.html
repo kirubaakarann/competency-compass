@@ -1,0 +1,266 @@
+{% extends "base.html" %}
+
+{% block title %}User Profile{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-12">
+            <h1>My Profile</h1>
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Personal Information</h5>
+                </div>
+                <div class="card-body">
+                    <form action="{{ url_for('users.update_profile') }}" method="post">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="firstName" class="form-label">First Name</label>
+                                <input type="text" class="form-control" id="firstName" name="first_name" value="{{ user.first_name }}" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="lastName" class="form-label">Last Name</label>
+                                <input type="text" class="form-control" id="lastName" name="last_name" value="{{ user.last_name }}" required>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="email" name="email" value="{{ user.email }}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="jobTitle" class="form-label">Current Job Title</label>
+                            <input type="text" class="form-control" id="jobTitle" name="job_title" value="{{ user.job_title }}">
+                        </div>
+                        <div class="mb-3">
+                            <label for="department" class="form-label">Department</label>
+                            <input type="text" class="form-control" id="department" name="department" value="{{ user.department }}">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Update Profile</button>
+                    </form>
+                </div>
+            </div>
+            
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">My Skills</h5>
+                    <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#addSkillModal">Add Skill</button>
+                </div>
+                <div class="card-body">
+                    {% if user.skills %}
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Skill</th>
+                                    <th>Category</th>
+                                    <th>Proficiency Level</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for skill in user.skills %}
+                                <tr>
+                                    <td>{{ skill.name }}</td>
+                                    <td>{{ skill.category }}</td>
+                                    <td>{{ skill.proficiency_level }}</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-primary edit-skill" 
+                                                data-skill-id="{{ skill.id }}"
+                                                data-skill-name="{{ skill.name }}"
+                                                data-skill-category="{{ skill.category }}"
+                                                data-skill-level="{{ skill.proficiency_level }}">
+                                            Edit
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-danger delete-skill" 
+                                                data-skill-id="{{ skill.id }}"
+                                                data-skill-name="{{ skill.name }}">
+                                            Delete
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    {% else %}
+                        <p class="text-center">No skills added yet.</p>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Career Goals</h5>
+                </div>
+                <div class="card-body">
+                    <form action="{{ url_for('users.update_career_goals') }}" method="post">
+                        <div class="mb-3">
+                            <label for="targetRole" class="form-label">Target Role</label>
+                            <select class="form-select" id="targetRole" name="target_role_id">
+                                <option value="">-- Select a target role --</option>
+                                {% for role in job_roles %}
+                                <option value="{{ role.id }}" {% if user.target_role_id == role.id %}selected{% endif %}>{{ role.title }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="careerGoals" class="form-label">Career Goals</label>
+                            <textarea class="form-control" id="careerGoals" name="career_goals" rows="3">{{ user.career_goals }}</textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Update Career Goals</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Skill Modal -->
+<div class="modal fade" id="addSkillModal" tabindex="-1" aria-labelledby="addSkillModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addSkillModalLabel">Add Skill</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addSkillForm" action="{{ url_for('users.add_skill') }}" method="post">
+                    <div class="mb-3">
+                        <label for="skillName" class="form-label">Skill Name</label>
+                        <input type="text" class="form-control" id="skillName" name="name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="skillCategory" class="form-label">Category</label>
+                        <select class="form-select" id="skillCategory" name="category" required>
+                            <option value="" selected disabled>Select a category</option>
+                            <option value="technical">Technical</option>
+                            <option value="soft_skill">Soft Skill</option>
+                            <option value="domain_knowledge">Domain Knowledge</option>
+                            <option value="leadership">Leadership</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="proficiencyLevel" class="form-label">Proficiency Level</label>
+                        <select class="form-select" id="proficiencyLevel" name="proficiency_level" required>
+                            <option value="" selected disabled>Select a level</option>
+                            <option value="beginner">Beginner</option>
+                            <option value="intermediate">Intermediate</option>
+                            <option value="advanced">Advanced</option>
+                            <option value="expert">Expert</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" form="addSkillForm" class="btn btn-primary">Add Skill</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Skill Modal -->
+<div class="modal fade" id="editSkillModal" tabindex="-1" aria-labelledby="editSkillModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editSkillModalLabel">Edit Skill</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editSkillForm" action="{{ url_for('users.update_skill') }}" method="post">
+                    <input type="hidden" id="editSkillId" name="skill_id">
+                    <div class="mb-3">
+                        <label for="editSkillName" class="form-label">Skill Name</label>
+                        <input type="text" class="form-control" id="editSkillName" name="name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editSkillCategory" class="form-label">Category</label>
+                        <select class="form-select" id="editSkillCategory" name="category" required>
+                            <option value="technical">Technical</option>
+                            <option value="soft_skill">Soft Skill</option>
+                            <option value="domain_knowledge">Domain Knowledge</option>
+                            <option value="leadership">Leadership</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editProficiencyLevel" class="form-label">Proficiency Level</label>
+                        <select class="form-select" id="editProficiencyLevel" name="proficiency_level" required>
+                            <option value="beginner">Beginner</option>
+                            <option value="intermediate">Intermediate</option>
+                            <option value="advanced">Advanced</option>
+                            <option value="expert">Expert</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" form="editSkillForm" class="btn btn-primary">Update Skill</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Skill Modal -->
+<div class="modal fade" id="deleteSkillModal" tabindex="-1" aria-labelledby="deleteSkillModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteSkillModalLabel">Delete Skill</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete the skill "<span id="deleteSkillName"></span>"?</p>
+                <form id="deleteSkillForm" action="{{ url_for('users.delete_skill') }}" method="post">
+                    <input type="hidden" id="deleteSkillId" name="skill_id">
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" form="deleteSkillForm" class="btn btn-danger">Delete</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Set up edit skill modal
+        const editButtons = document.querySelectorAll('.edit-skill');
+        editButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const skillId = this.getAttribute('data-skill-id');
+                const skillName = this.getAttribute('data-skill-name');
+                const skillCategory = this.getAttribute('data-skill-category');
+                const skillLevel = this.getAttribute('data-skill-level');
+                
+                document.getElementById('editSkillId').value = skillId;
+                document.getElementById('editSkillName').value = skillName;
+                document.getElementById('editSkillCategory').value = skillCategory;
+                document.getElementById('editProficiencyLevel').value = skillLevel;
+                
+                const editModal = new bootstrap.Modal(document.getElementById('editSkillModal'));
+                editModal.show();
+            });
+        });
+        
+        // Set up delete skill modal
+        const deleteButtons = document.querySelectorAll('.delete-skill');
+        deleteButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const skillId = this.getAttribute('data-skill-id');
+                const skillName = this.getAttribute('data-skill-name');
+                
+                document.getElementById('deleteSkillId').value = skillId;
+                document.getElementById('deleteSkillName').textContent = skillName;
+                
+                const deleteModal = new bootstrap.Modal(document.getElementById('deleteSkillModal'));
+                deleteModal.show();
+            });
+        });
+    });
+</script>
+{% endblock %}
+{% endblock %}

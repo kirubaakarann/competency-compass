@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Competency Compass{% endblock %}</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Custom CSS -->
+    <style>
+        .sidebar-active {
+            background-color: rgba(255, 255, 255, 0.1);
+            border-left: 3px solid white;
+        }
+    </style>
+    
+    {% block styles %}{% endblock %}
+</head>
+<body class="bg-gray-100 min-h-screen flex flex-col">
+    <!-- Top Navbar -->
+    <nav class="bg-blue-600 text-white shadow-md">
+        <div class="container mx-auto px-4">
+            <div class="flex justify-between items-center py-3">
+                <div class="flex items-center">
+                    <a href="{{ url_for('index') }}" class="font-bold text-xl">Competency Compass</a>
+                </div>
+                
+                <div class="flex items-center space-x-4">
+                    <div class="relative">
+                        <button id="user-menu-button" class="flex items-center focus:outline-none">
+                            <span class="mr-2">Admin User</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M10 3a7 7 0 100 14 7 7 0 000-14zm0 18a9 9 0 110-18 9 9 0 010 18z" clip-rule="evenodd" />
+                                <path fill-rule="evenodd" d="M10 12a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd" />
+                            </svg>
+                        </button>
+                        
+                        <div id="user-dropdown" class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 hidden">
+                            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">My Profile</a>
+                            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Settings</a>
+                            <div class="border-t border-gray-100"></div>
+                            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Logout</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="flex flex-1">
+        <!-- Sidebar -->
+        <aside class="w-64 bg-gray-800 text-white shadow-lg hidden md:block">
+            <div class="p-4">
+                <nav>
+                    <ul>
+                        <li class="mb-1">
+                            <a href="{{ url_for('index') }}" class="block py-2 px-4 rounded hover:bg-gray-700 {% if request.path == url_for('index') %}sidebar-active{% endif %}">
+                                <div class="flex items-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                                    </svg>
+                                    Dashboard
+                                </div>
+                            </a>
+                        </li>
+                        <li class="mb-1">
+                            <a href="{{ url_for('departments.index') }}" class="block py-2 px-4 rounded hover:bg-gray-700 {% if '/departments' in request.path %}sidebar-active{% endif %}">
+                                <div class="flex items-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                                    </svg>
+                                    Departments
+                                </div>
+                            </a>
+                        </li>
+                        <li class="mb-1">
+                            <a href="{{ url_for('competencies.index') }}" class="block py-2 px-4 rounded hover:bg-gray-700 {% if '/competencies' in request.path %}sidebar-active{% endif %}">
+                                <div class="flex items-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    Competencies
+                                </div>
+                            </a>
+                        </li>
+                        <li class="mb-1">
+                            <a href="{{ url_for('job_roles.index') }}" class="block py-2 px-4 rounded hover:bg-gray-700 {% if '/job-roles' in request.path %}sidebar-active{% endif %}">
+                                <div class="flex items-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                    </svg>
+                                    Job Roles
+                                </div>
+                            </a>
+                        </li>
+                        <li class="mb-1">
+                            <a href="{{ url_for('employees.index') }}" class="block py-2 px-4 rounded hover:bg-gray-700 {% if '/employees' in request.path %}sidebar-active{% endif %}">
+                                <div class="flex items-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                                    </svg>
+                                    Employees
+                                </div>
+                            </a>
+                        </li>
+                        <li class="mb-1">
+                            <a href="{{ url_for('assessments.index') }}" class="block py-2 px-4 rounded hover:bg-gray-700 {% if '/assessments' in request.path %}sidebar-active{% endif %}">
+                                <div class="flex items-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                                    </svg>
+                                    Assessments
+                                </div>
+                            </a>
+                        </li>
+                        <li class="mb-1">
+                            <a href="{{ url_for('development_plans.index') }}" class="block py-2 px-4 rounded hover:bg-gray-700 {% if '/development-plans' in request.path %}sidebar-active{% endif %}">
+                                <div class="flex items-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0
+                                        002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                                    </svg>
+                                    Development Plans
+                                </div>
+                            </a>
+                        </li>
+                        <li class="mb-1">
+                            <a href="{{ url_for('ai_recommendations.index') }}" class="block py-2 px-4 rounded hover:bg-gray-700 {% if '/ai-recommendations' in request.path %}sidebar-active{% endif %}">
+                                <div class="flex items-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                                    </svg>
+                                    AI Recommendations
+                                </div>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </aside>
+
+        <!-- Content -->
+        <main class="flex-1 h-full overflow-y-auto">
+            <!-- Flash Messages -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <div class="container mx-auto px-4 py-2">
+                        {% for category, message in messages %}
+                            <div class="{% if category == 'error' %}bg-red-100 border-red-400 text-red-700{% else %}bg-green-100 border-green-400 text-green-700{% endif %} px-4 py-3 rounded relative mb-4" role="alert">
+                                <span class="block sm:inline">{{ message }}</span>
+                                <button type="button" class="absolute top-0 bottom-0 right-0 px-4 py-3 alert-close">
+                                    <svg class="fill-current h-6 w-6" role="button" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><title>Close</title><path d="M14.348 14.849a1.2 1.2 0 0 1-1.697 0L10 11.819l-2.651 3.029a1.2 1.2 0 1 1-1.697-1.697l2.758-3.15-2.759-3.152a1.2 1.2 0 1 1 1.697-1.697L10 8.183l2.651-3.031a1.2 1.2 0 1 1 1.697 1.697l-2.758 3.152 2.758 3.15a1.2 1.2 0 0 1 0 1.698z"/></svg>
+                                </button>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
+            
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-4">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="mb-4 md:mb-0">
+                    <p>&copy; 2025 Competency Compass. All rights reserved.</p>
+                </div>
+                <div>
+                    <a href="#" class="text-gray-400 hover:text-white mr-4">Privacy Policy</a>
+                    <a href="#" class="text-gray-400 hover:text-white">Terms of Service</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script>
+        // User dropdown toggle
+        document.addEventListener('DOMContentLoaded', function() {
+            const userMenuButton = document.getElementById('user-menu-button');
+            const userDropdown = document.getElementById('user-dropdown');
+            
+            if (userMenuButton && userDropdown) {
+                userMenuButton.addEventListener('click', function() {
+                    userDropdown.classList.toggle('hidden');
+                });
+                
+                // Close dropdown when clicking outside
+                document.addEventListener('click', function(event) {
+                    if (!userMenuButton.contains(event.target) && !userDropdown.contains(event.target)) {
+                        userDropdown.classList.add('hidden');
+                    }
+                });
+            }
+            
+            // Alert close buttons
+            const alertCloseButtons = document.querySelectorAll('.alert-close');
+            alertCloseButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    this.parentElement.remove();
+                });
+            });
+        });
+    </script>
+    
+    {% block scripts %}{% endblock %}

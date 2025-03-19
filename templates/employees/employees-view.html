@@ -1,0 +1,247 @@
+{% extends "base.html" %}
+
+{% block title %}{{ employee.name }}{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-2xl font-bold">{{ employee.name }}</h1>
+        <div>
+            <a href="{{ url_for('employees.index') }}" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded mr-2">
+                Back to Employees
+            </a>
+            <a href="{{ url_for('employees.edit', id=employee.id) }}" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded mr-2">
+                Edit
+            </a>
+            <button id="delete-button" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded">
+                Delete
+            </button>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+        <!-- Employee profile card -->
+        <div class="bg-white shadow-md rounded-lg p-6">
+            <div class="flex items-center mb-6">
+                <div class="flex-shrink-0 h-20 w-20 rounded-full bg-gray-300 flex items-center justify-center">
+                    <span class="text-3xl font-medium text-gray-700">{{ employee.name[:1] }}</span>
+                </div>
+                <div class="ml-4">
+                    <h2 class="text-xl font-bold">{{ employee.name }}</h2>
+                    <p class="text-gray-600">{{ employee.email }}</p>
+                </div>
+            </div>
+            
+            <div class="border-t pt-4">
+                <div class="mb-4">
+                    <p class="text-gray-600 text-sm">Job Role</p>
+                    <p class="font-semibold">{{ job_role.title }}</p>
+                </div>
+                <div class="mb-4">
+                    <p class="text-gray-600 text-sm">Department</p>
+                    <p class="font-semibold">{{ job_role.department.name }}</p>
+                </div>
+                <div class="mb-4">
+                    <p class="text-gray-600 text-sm">Hire Date</p>
+                    <p class="font-semibold">
+                        {% if employee.hire_date %}
+                            {{ employee.hire_date.strftime('%B %d, %Y') }}
+                        {% else %}
+                            <span class="text-gray-400">Not set</span>
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+            
+            <div class="border-t pt-4 mt-4">
+                <div class="flex justify-between mb-2">
+                    <h3 class="font-bold text-gray-700">Actions</h3>
+                </div>
+                <div class="space-y-2">
+                    <a href="{{ url_for('assessments.create', employee_id=employee.id) }}" class="block w-full text-center bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded">
+                        Create Assessment
+                    </a>
+                    <a href="{{ url_for('development_plans.create', employee_id=employee.id) }}" class="block w-full text-center bg-purple-500 hover:bg-purple-600 text-white font-bold py-2 px-4 rounded">
+                        Create Development Plan
+                    </a>
+                    <a href="{{ url_for('ai_recommendations.generate', employee_id=employee.id) }}" class="block w-full text-center bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">
+                        Generate AI Recommendations
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Competency radar chart -->
+        <div class="lg:col-span-2 bg-white shadow-md rounded-lg p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold">Competency Profile</h2>
+                <a href="{{ url_for('employees.competency_radar', id=employee.id) }}" class="text-blue-500 hover:text-blue-700">
+                    View Full Chart
+                </a>
+            </div>
+            
+            {% if competency_data %}
+                <div class="mb-4 h-64">
+                    <!-- Placeholder for radar chart -->
+                    <div class="w-full h-full flex items-center justify-center bg-gray-100 rounded-lg">
+                        <p class="text-gray-500">Radar chart visualization</p>
+                    </div>
+                </div>
+                
+                <div class="border-t pt-4">
+                    <h3 class="font-bold text-gray-700 mb-4">Competency Details</h3>
+                    <div class="space-y-4">
+                        {% for competency in competency_data %}
+                            <div>
+                                <div class="flex justify-between mb-1">
+                                    <span class="font-medium">{{ competency.name }}</span>
+                                    <span class="text-sm">
+                                        <span class="font-medium">Current:</span> {{ competency.current_level }}/5
+                                        <span class="font-medium ml-2">Required:</span> {{ competency.required_level }}/5
+                                    </span>
+                                </div>
+                                <div class="relative">
+                                    <div class="w-full bg-gray-200 rounded-full h-2.5">
+                                        <div class="bg-blue-600 h-2.5 rounded-full" style="width: {{ competency.current_level * 20 }}%"></div>
+                                    </div>
+                                    <div class="absolute top-0 h-5" style="left: {{ competency.required_level * 20 - 0.5 }}%;">
+                                        <div class="w-0.5 h-5 bg-red-500"></div>
+                                    </div>
+                                </div>
+                                {% if competency.current_level < competency.required_level %}
+                                    <p class="text-sm text-red-500 mt-1">Gap: {{ competency.required_level - competency.current_level }}</p>
+                                {% elif competency.current_level > competency.required_level %}
+                                    <p class="text-sm text-green-500 mt-1">Exceeds by: {{ competency.current_level - competency.required_level }}</p>
+                                {% else %}
+                                    <p class="text-sm text-gray-500 mt-1">Meets requirement</p>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% else %}
+                <div class="bg-gray-100 rounded-lg p-6 text-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                    </svg>
+                    <h3 class="text-lg font-semibold text-gray-600 mb-2">No Assessment Data</h3>
+                    <p class="text-gray-500 mb-4">This employee hasn't been assessed yet.</p>
+                    <a href="{{ url_for('assessments.create', employee_id=employee.id) }}" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded">
+                        Create First Assessment
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- Assessment history section -->
+    <div class="bg-white shadow-md rounded-lg p-6 mb-8">
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-xl font-bold">Assessment History</h2>
+            <a href="{{ url_for('assessments.create', employee_id=employee.id) }}" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded">
+                New Assessment
+            </a>
+        </div>
+        
+        {% if assessments %}
+            <div class="overflow-x-auto">
+                <table class="min-w-full">
+                    <thead class="bg-gray-100">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Assessor</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Avg. Rating</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Notes</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200">
+                        {% for assessment in assessments %}
+                        <tr>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                {{ assessment.assessment_date.strftime('%b %d, %Y') }}
+                                {% if loop.first %}
+                                    <span class="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded ml-2">Latest</span>
+                                {% endif %}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">{{ assessment.assessor.name }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                {% set avg_rating = assessment.ratings|sum(attribute='rating') / assessment.ratings|length if assessment.ratings else 0 %}
+                                <div class="flex items-center">
+                                    <span class="mr-2">{{ avg_rating|round(1) }}</span>
+                                    <div class="w-24 bg-gray-200 rounded-full h-2.5">
+                                        <div class="bg-blue-600 h-2.5 rounded-full" style="width: {{ (avg_rating/5) * 100 }}%"></div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="truncate max-w-xs">{{ assessment.notes or '-' }}</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <a href="{{ url_for('assessments.view', id=assessment.id) }}" class="text-blue-600 hover:text-blue-900">View</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="bg-gray-50 rounded-lg p-6 text-center">
+                <p class="text-gray-500">No assessments have been conducted yet.</p>
+            </div>
+        {% endif %}
+    </div>
+    
+    <!-- Development plans section -->
+    <div class="bg-white shadow-md rounded-lg p-6">
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-xl font-bold">Development Plans</h2>
+            <a href="{{ url_for('development_plans.create', employee_id=employee.id) }}" class="bg-purple-500 hover:bg-purple-600 text-white font-bold py-2 px-4 rounded">
+                New Plan
+            </a>
+        </div>
+        
+        <div class="bg-gray-50 rounded-lg p-6 text-center">
+            <p class="text-gray-500">Development plans feature coming soon.</p>
+        </div>
+    </div>
+</div>
+
+<!-- Delete confirmation modal -->
+<div id="delete-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+    <div class="bg-white rounded-lg p-8 max-w-md">
+        <h3 class="text-xl font-bold mb-4">Delete Employee</h3>
+        <p class="mb-6">Are you sure you want to delete "{{ employee.name }}"? This action cannot be undone.</p>
+        <div class="flex justify-end">
+            <button id="cancel-delete" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded mr-2">
+                Cancel
+            </button>
+            <form action="{{ url_for('employees.delete', id=employee.id) }}" method="POST">
+                <button type="submit" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded">
+                    Delete
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const deleteButton = document.getElementById('delete-button');
+        const deleteModal = document.getElementById('delete-modal');
+        const cancelDelete = document.getElementById('cancel-delete');
+        
+        deleteButton.addEventListener('click', function() {
+            deleteModal.classList.remove('hidden');
+            deleteModal.classList.add('flex');
+        });
+        
+        cancelDelete.addEventListener('click', function() {
+            deleteModal.classList.add('hidden');
+            deleteModal.classList.remove('flex');
+        });
+    });
+</script>
+{% endblock %}

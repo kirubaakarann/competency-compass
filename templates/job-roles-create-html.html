@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block title %}Create Job Role - Competency Compass AI{% endblock %}
+
+{% block header %}Create New Job Role{% endblock %}
+
+{% block content %}
+<form method="POST" action="{{ url_for('create_job_role') }}">
+    <div class="mb-3">
+        <label for="title" class="form-label">Job Title</label>
+        <input type="text" class="form-control" id="title" name="title" required>
+        <div class="form-text">Enter a descriptive title for this job role</div>
+    </div>
+    
+    <div class="mb-3">
+        <label for="description" class="form-label">Job Description</label>
+        <textarea class="form-control" id="description" name="description" rows="5" required></textarea>
+        <div class="form-text">Provide a detailed description of the job responsibilities, requirements, and expectations</div>
+    </div>
+    
+    <div class="mb-3">
+        <label for="taxonomy" class="form-label">Base Taxonomy</label>
+        <select class="form-select" id="taxonomy" name="taxonomy">
+            {% for taxonomy in taxonomies %}
+            <option value="{{ taxonomy }}">{{ taxonomy }}</option>
+            {% endfor %}
+        </select>
+        <div class="form-text">Select the competency taxonomy to use for this job role</div>
+    </div>
+    
+    <div class="d-flex justify-content-between">
+        <a href="{{ url_for('list_job_roles') }}" class="btn btn-secondary">Cancel</a>
+        <button type="submit" class="btn btn-primary">Create and Suggest Competencies</button>
+    </div>
+</form>
+{% endblock %}

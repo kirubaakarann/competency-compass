@@ -1,0 +1,249 @@
+{% extends "base.html" %}
+
+{% block title %}Job Role: {{ job_role.title }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col">
+            <h1>{{ job_role.title }}</h1>
+            <p class="text-muted">{{ job_role.description }}</p>
+            <div class="mb-3">
+                <a href="{{ url_for('job_roles.edit', job_role_id=job_role.id) }}" class="btn btn-primary">Edit Job Role</a>
+                <a href="{{ url_for('job_roles.suggest_competencies', job_role_id=job_role.id) }}" class="btn btn-success">Suggest Competencies</a>
+                <a href="{{ url_for('gap_analysis.analyze', job_role_id=job_role.id) }}" class="btn btn-info">Gap Analysis</a>
+                <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteJobRoleModal">Delete Job Role</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Competencies</h5>
+                    <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#addCompetencyModal">Add Competency</button>
+                </div>
+                <div class="card-body">
+                    {% if job_role.competencies %}
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Category</th>
+                                    <th>Proficiency Level</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for competency in job_role.competencies %}
+                                <tr>
+                                    <td>{{ competency.name }}</td>
+                                    <td>{{ competency.category }}</td>
+                                    <td>{{ competency.proficiency_level }}</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-primary edit-competency" 
+                                                data-competency-id="{{ competency.id }}"
+                                                data-competency-name="{{ competency.name }}"
+                                                data-competency-category="{{ competency.category }}"
+                                                data-competency-level="{{ competency.proficiency_level }}">
+                                            Edit
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-danger delete-competency" 
+                                                data-competency-id="{{ competency.id }}"
+                                                data-competency-name="{{ competency.name }}">
+                                            Delete
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    {% else %}
+                        <p class="text-center">No competencies added yet.</p>
+                        <div class="text-center">
+                            <a href="{{ url_for('job_roles.suggest_competencies', job_role_id=job_role.id) }}" class="btn btn-outline-success">
+                                Get AI Suggestions
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Competency Modal -->
+<div class="modal fade" id="addCompetencyModal" tabindex="-1" aria-labelledby="addCompetencyModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addCompetencyModalLabel">Add Competency</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addCompetencyForm" action="{{ url_for('job_roles.add_competency', job_role_id=job_role.id) }}" method="post">
+                    <div class="mb-3">
+                        <label for="competencyName" class="form-label">Competency Name</label>
+                        <input type="text" class="form-control" id="competencyName" name="name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="competencyCategory" class="form-label">Category</label>
+                        <select class="form-select" id="competencyCategory" name="category" required>
+                            <option value="" selected disabled>Select a category</option>
+                            <option value="technical">Technical</option>
+                            <option value="soft_skill">Soft Skill</option>
+                            <option value="domain_knowledge">Domain Knowledge</option>
+                            <option value="leadership">Leadership</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="proficiencyLevel" class="form-label">Proficiency Level Required</label>
+                        <select class="form-select" id="proficiencyLevel" name="proficiency_level" required>
+                            <option value="" selected disabled>Select a level</option>
+                            <option value="beginner">Beginner</option>
+                            <option value="intermediate">Intermediate</option>
+                            <option value="advanced">Advanced</option>
+                            <option value="expert">Expert</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" form="addCompetencyForm" class="btn btn-primary">Add Competency</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Competency Modal -->
+<div class="modal fade" id="editCompetencyModal" tabindex="-1" aria-labelledby="editCompetencyModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editCompetencyModalLabel">Edit Competency</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editCompetencyForm" action="{{ url_for('job_roles.update_competency', job_role_id=job_role.id) }}" method="post">
+                    <input type="hidden" id="editCompetencyId" name="competency_id">
+                    <div class="mb-3">
+                        <label for="editCompetencyName" class="form-label">Competency Name</label>
+                        <input type="text" class="form-control" id="editCompetencyName" name="name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editCompetencyCategory" class="form-label">Category</label>
+                        <select class="form-select" id="editCompetencyCategory" name="category" required>
+                            <option value="technical">Technical</option>
+                            <option value="soft_skill">Soft Skill</option>
+                            <option value="domain_knowledge">Domain Knowledge</option>
+                            <option value="leadership">Leadership</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editProficiencyLevel" class="form-label">Proficiency Level Required</label>
+                        <select class="form-select" id="editProficiencyLevel" name="proficiency_level" required>
+                            <option value="beginner">Beginner</option>
+                            <option value="intermediate">Intermediate</option>
+                            <option value="advanced">Advanced</option>
+                            <option value="expert">Expert</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" form="editCompetencyForm" class="btn btn-primary">Update Competency</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Competency Modal -->
+<div class="modal fade" id="deleteCompetencyModal" tabindex="-1" aria-labelledby="deleteCompetencyModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteCompetencyModalLabel">Delete Competency</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete the competency "<span id="deleteCompetencyName"></span>"?</p>
+                <form id="deleteCompetencyForm" action="{{ url_for('job_roles.delete_competency', job_role_id=job_role.id) }}" method="post">
+                    <input type="hidden" id="deleteCompetencyId" name="competency_id">
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" form="deleteCompetencyForm" class="btn btn-danger">Delete</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Job Role Modal -->
+<div class="modal fade" id="deleteJobRoleModal" tabindex="-1" aria-labelledby="deleteJobRoleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteJobRoleModalLabel">Delete Job Role</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete the job role "{{ job_role.title }}"?</p>
+                <p class="text-danger">This action cannot be undone.</p>
+                <form id="deleteJobRoleForm" action="{{ url_for('job_roles.delete', job_role_id=job_role.id) }}" method="post">
+                    <!-- CSRF token would be added here in a real application -->
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" form="deleteJobRoleForm" class="btn btn-danger">Delete</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Set up edit competency modal
+        const editButtons = document.querySelectorAll('.edit-competency');
+        editButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const competencyId = this.getAttribute('data-competency-id');
+                const competencyName = this.getAttribute('data-competency-name');
+                const competencyCategory = this.getAttribute('data-competency-category');
+                const competencyLevel = this.getAttribute('data-competency-level');
+                
+                document.getElementById('editCompetencyId').value = competencyId;
+                document.getElementById('editCompetencyName').value = competencyName;
+                document.getElementById('editCompetencyCategory').value = competencyCategory;
+                document.getElementById('editProficiencyLevel').value = competencyLevel;
+                
+                const editModal = new bootstrap.Modal(document.getElementById('editCompetencyModal'));
+                editModal.show();
+            });
+        });
+        
+        // Set up delete competency modal
+        const deleteButtons = document.querySelectorAll('.delete-competency');
+        deleteButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const competencyId = this.getAttribute('data-competency-id');
+                const competencyName = this.getAttribute('data-competency-name');
+                
+                document.getElementById('deleteCompetencyId').value = competencyId;
+                document.getElementById('deleteCompetencyName').textContent = competencyName;
+                
+                const deleteModal = new bootstrap.Modal(document.getElementById('deleteCompetencyModal'));
+                deleteModal.show();
+            });
+        });
+    });
+</script>
+{% endblock %}
+{% endblock %}

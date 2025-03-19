@@ -1,0 +1,420 @@
+{% extends "base.html" %}
+
+{% block title %}Gap Analysis for {{ job_role.title }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col">
+            <h1>Gap Analysis: {{ job_role.title }}</h1>
+            <p class="text-muted">Compare your skills with job requirements</p>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Summary</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="stats-card bg-light p-3 rounded">
+                                <h6>Overall Match</h6>
+                                <div class="d-flex align-items-center">
+                                    <div class="progress flex-grow-1 me-3" style="height: 20px;">
+                                        <div class="progress-bar bg-success" role="progressbar" style="width: {{ overall_match }}%;" aria-valuenow="{{ overall_match }}" aria-valuemin="0" aria-valuemax="100">{{ overall_match }}%</div>
+                                    </div>
+                                    <span class="fw-bold">{{ overall_match }}%</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="stats-card bg-light p-3 rounded">
+                                <h6>Gap Summary</h6>
+                                <ul class="list-unstyled">
+                                    <li>
+                                        <i class="bi bi-check-circle-fill text-success me-2"></i>
+                                        <span>{{ matched_skills }} skills matched</span>
+                                    </li>
+                                    <li>
+                                        <i class="bi bi-arrow-up-circle-fill text-warning me-2"></i>
+                                        <span>{{ partial_match_skills }} skills need improvement</span>
+                                    </li>
+                                    <li>
+                                        <i class="bi bi-x-circle-fill text-danger me-2"></i>
+                                        <span>{{ missing_skills }} skills missing</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Detailed Analysis</h5>
+                </div>
+                <div class="card-body">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Competency</th>
+                                <th>Category</th>
+                                <th>Required Level</th>
+                                <th>Your Level</th>
+                                <th>Gap</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in gap_analysis %}
+                            <tr>
+                                <td>{{ item.competency_name }}</td>
+                                <td>{{ item.category }}</td>
+                                <td>
+                                    <span class="badge bg-primary">{{ item.required_level }}</span>
+                                </td>
+                                <td>
+                                    {% if item.your_level %}
+                                        <span class="badge bg-info">{{ item.your_level }}</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">Not assessed</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if item.gap_level > 0 %}
+                                        <span class="badge bg-warning">{{ item.gap_level }} level(s) gap</span>
+                                    {% elif item.gap_level == 0 %}
+                                        <span class="badge bg-success">No gap</span>
+                                    {% else %}
+                                        <span class="badge bg-info">{{ item.gap_level|abs }} level(s) above</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if item.status == 'matched' %}
+                                        <span class="text-success">
+                                            <i class="bi bi-check-circle-fill"></i> Matched
+                                        </span>
+                                    {% elif item.status == 'partial' %}
+                                        <span class="text-warning">
+                                            <i class="bi bi-arrow-up-circle-fill"></i> Needs Improvement
+                                        </span>
+                                    {% else %}
+                                        <span class="text-danger">
+                                            <i class="bi bi-x-circle-fill"></i> Missing
+                                        </span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Recommendations</h5>
+                </div>
+                <div class="card-body">
+                    <div class="accordion" id="recommendationsAccordion">
+                        {% if missing_skills_data %}
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="headingMissing">
+                                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseMissing" aria-expanded="true" aria-controls="collapseMissing">
+                                    Missing Skills
+                                </button>
+                            </h2>
+                            <div id="collapseMissing" class="accordion-collapse collapse show" aria-labelledby="headingMissing">
+                                <div class="accordion-body">
+                                    <ul class="list-group">
+                                        {% for skill in missing_skills_data %}
+                                        <li class="list-group-item">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <div>
+                                                    <h6 class="mb-1">{{ skill.competency_name }} ({{ skill.category }})</h6>
+                                                    <p class="text-muted mb-0">Required level: {{ skill.required_level }}</p>
+                                                    <p class="small mb-0">{{ skill.learning_resources }}</p>
+                                                </div>
+                                                <div>
+                                                    <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#learningResourceModal" data-competency="{{ skill.competency_name }}">
+                                                        Learning Resources
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                        
+                        {% if partial_match_skills_data %}
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="headingPartial">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapsePartial" aria-expanded="false" aria-controls="collapsePartial">
+                                    Skills Needing Improvement
+                                </button>
+                            </h2>
+                            <div id="collapsePartial" class="accordion-collapse collapse" aria-labelledby="headingPartial">
+                                <div class="accordion-body">
+                                    <ul class="list-group">
+                                        {% for skill in partial_match_skills_data %}
+                                        <li class="list-group-item">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <div>
+                                                    <h6 class="mb-1">{{ skill.competency_name }} ({{ skill.category }})</h6>
+                                                    <p class="text-muted mb-0">Your level: {{ skill.your_level }} | Required level: {{ skill.required_level }}</p>
+                                                    <p class="small mb-0">{{ skill.learning_resources }}</p>
+                                                </div>
+                                                <div>
+                                                    <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#learningResourceModal" data-competency="{{ skill.competency_name }}">
+                                                        Learning Resources
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                        
+                        {% if matched_skills_data %}
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="headingMatched">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseMatched" aria-expanded="false" aria-controls="collapseMatched">
+                                    Matched Skills
+                                </button>
+                            </h2>
+                            <div id="collapseMatched" class="accordion-collapse collapse" aria-labelledby="headingMatched">
+                                <div class="accordion-body">
+                                    <ul class="list-group">
+                                        {% for skill in matched_skills_data %}
+                                        <li class="list-group-item">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <div>
+                                                    <h6 class="mb-1">{{ skill.competency_name }} ({{ skill.category }})</h6>
+                                                    <p class="text-muted mb-0">Your level: {{ skill.your_level }}</p>
+                                                </div>
+                                                <div>
+                                                    <span class="badge bg-success">Matched</span>
+                                                </div>
+                                            </div>
+                                        </li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Development Plan</h5>
+                </div>
+                <div class="card-body">
+                    <form action="{{ url_for('gap_analysis.save_development_plan', job_role_id=job_role.id) }}" method="post">
+                        <div class="mb-3">
+                            <label for="developmentGoals" class="form-label">Development Goals</label>
+                            <textarea class="form-control" id="developmentGoals" name="development_goals" rows="3" placeholder="Enter your development goals...">{{ development_plan.goals if development_plan else '' }}</textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="timeline" class="form-label">Timeline</label>
+                            <input type="text" class="form-control" id="timeline" name="timeline" placeholder="e.g., 6 months, 1 year" value="{{ development_plan.timeline if development_plan else '' }}">
+                        </div>
+                        <div class="mb-3">
+                            <label for="prioritySkills" class="form-label">Priority Skills to Develop</label>
+                            <select class="form-select" id="prioritySkills" name="priority_skills" multiple>
+                                {% for skill in missing_skills_data %}
+                                <option value="{{ skill.competency_name }}" {% if development_plan and skill.competency_name in development_plan.priority_skills %}selected{% endif %}>{{ skill.competency_name }} (Missing)</option>
+                                {% endfor %}
+                                {% for skill in partial_match_skills_data %}
+                                <option value="{{ skill.competency_name }}" {% if development_plan and skill.competency_name in development_plan.priority_skills %}selected{% endif %}>{{ skill.competency_name }} (Needs Improvement)</option>
+                                {% endfor %}
+                            </select>
+                            <div class="form-text">Hold Ctrl (or Cmd on Mac) to select multiple skills</div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Save Development Plan</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Learning Resources Modal -->
+<div class="modal fade" id="learningResourceModal" tabindex="-1" aria-labelledby="learningResourceModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="learningResourceModalLabel">Learning Resources for <span id="competencyName"></span></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="text-center py-5">
+                    <div class="spinner-border" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="mt-3">Loading personalized learning resources...</p>
+                </div>
+                <div id="learningResourcesContent" class="d-none">
+                    <!-- Content will be loaded here -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="saveToDevPlan">Save to Development Plan</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Learning Resources Modal
+        const learningResourceModal = document.getElementById('learningResourceModal');
+        if (learningResourceModal) {
+            learningResourceModal.addEventListener('show.bs.modal', function (event) {
+                const button = event.relatedTarget;
+                const competency = button.getAttribute('data-competency');
+                const modalTitle = this.querySelector('#competencyName');
+                modalTitle.textContent = competency;
+                
+                // Simulate loading resources
+                const spinner = this.querySelector('.spinner-border').parentElement;
+                const content = this.querySelector('#learningResourcesContent');
+                
+                // Reset content
+                content.classList.add('d-none');
+                spinner.classList.remove('d-none');
+                
+                // Fetch learning resources
+                setTimeout(() => {
+                    // This would be replaced with an actual API call
+                    fetchLearningResources(competency).then(resources => {
+                        renderLearningResources(resources, content);
+                        spinner.classList.add('d-none');
+                        content.classList.remove('d-none');
+                    });
+                }, 1000);
+            });
+        }
+        
+        // Simulated API call
+        function fetchLearningResources(competency) {
+            // This would be replaced with an actual API call
+            return new Promise((resolve) => {
+                resolve({
+                    competency: competency,
+                    resources: [
+                        {
+                            type: 'Online Course',
+                            title: 'Introduction to ' + competency,
+                            provider: 'Coursera',
+                            link: '#',
+                            duration: '4 weeks',
+                            level: 'Beginner'
+                        },
+                        {
+                            type: 'Book',
+                            title: 'Mastering ' + competency,
+                            author: 'Jane Doe',
+                            link: '#',
+                            pages: 300,
+                            level: 'Intermediate'
+                        },
+                        {
+                            type: 'Workshop',
+                            title: 'Advanced ' + competency + ' Techniques',
+                            provider: 'Internal Training',
+                            duration: '2 days',
+                            level: 'Advanced'
+                        }
+                    ]
+                });
+            });
+        }
+        
+        function renderLearningResources(data, container) {
+            let html = `
+                <h5>Recommended Learning Resources for ${data.competency}</h5>
+                <div class="list-group">
+            `;
+            
+            data.resources.forEach(resource => {
+                html += `
+                    <div class="list-group-item">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h6 class="mb-1">${resource.title}</h6>
+                            <span class="badge bg-primary">${resource.level}</span>
+                        </div>
+                        <p class="mb-1">Type: ${resource.type}</p>
+                `;
+                
+                if (resource.provider) {
+                    html += `<p class="mb-1">Provider: ${resource.provider}</p>`;
+                }
+                
+                if (resource.author) {
+                    html += `<p class="mb-1">Author: ${resource.author}</p>`;
+                }
+                
+                if (resource.duration) {
+                    html += `<p class="mb-1">Duration: ${resource.duration}</p>`;
+                }
+                
+                if (resource.pages) {
+                    html += `<p class="mb-1">Pages: ${resource.pages}</p>`;
+                }
+                
+                html += `
+                        <div class="d-flex justify-content-end mt-2">
+                            <button class="btn btn-sm btn-outline-primary me-2">View Details</button>
+                            <button class="btn btn-sm btn-success">Add to Plan</button>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            html += `
+                </div>
+                <div class="mt-3">
+                    <h6>AI-Generated Learning Path</h6>
+                    <p>Based on your current skills and the requirements for ${data.competency}, here's a suggested learning path:</p>
+                    <ol>
+                        <li>Start with fundamentals (1-2 weeks)</li>
+                        <li>Practice with real-world examples (2-3 weeks)</li>
+                        <li>Build a personal project using this skill (3-4 weeks)</li>
+                        <li>Seek feedback and refine your approach (1 week)</li>
+                    </ol>
+                </div>
+            `;
+            
+            container.innerHTML = html;
+        }
+    });
+</script>
+{% endblock %}
+{% endblock %}

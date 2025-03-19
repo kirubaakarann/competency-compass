@@ -1,0 +1,170 @@
+{% extends "base.html" %}
+
+{% block title %}Competency Radar - {{ employee.name }}{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-2xl font-bold">Competency Radar Chart</h1>
+        <a href="{{ url_for('employees.view', id=employee.id) }}" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded">
+            Back to Employee
+        </a>
+    </div>
+
+    <div class="bg-white shadow-md rounded-lg p-6 mb-8">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
+            <div class="mb-4 md:mb-0">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 h-12 w-12 rounded-full bg-gray-300 flex items-center justify-center">
+                        <span class="text-lg font-medium text-gray-700">{{ employee.name[:1] }}</span>
+                    </div>
+                    <div class="ml-4">
+                        <h2 class="text-xl font-bold">{{ employee.name }}</h2>
+                        <p class="text-gray-600">{{ job_role.title }} - {{ job_role.department.name }}</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div>
+                <a href="{{ url_for('assessments.create', employee_id=employee.id) }}" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded">
+                    Create New Assessment
+                </a>
+            </div>
+        </div>
+        
+        {% if labels %}
+            <div class="mb-8">
+                <div class="border border-gray-200 rounded-lg p-4">
+                    <div class="h-96" id="radar-chart"></div>
+                </div>
+            </div>
+            
+            <div class="overflow-x-auto">
+                <table class="min-w-full border rounded-lg overflow-hidden">
+                    <thead class="bg-gray-100">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Competency</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Current Level</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Required Level</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Gap Analysis</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200">
+                        {% for i in range(labels|length) %}
+                            {% set current = current_data[i] %}
+                            {% set required = required_data[i] %}
+                            {% set gap = required - current %}
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap font-medium">{{ labels[i] }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex items-center">
+                                        <span class="mr-2">{{ current }}</span>
+                                        <div class="w-24 bg-gray-200 rounded-full h-2.5">
+                                            <div class="bg-blue-600 h-2.5 rounded-full" style="width: {{ (current/5) * 100 }}%"></div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex items-center">
+                                        <span class="mr-2">{{ required }}</span>
+                                        <div class="w-24 bg-gray-200 rounded-full h-2.5">
+                                            <div class="bg-red-600 h-2.5 rounded-full" style="width: {{ (required/5) * 100 }}%"></div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    {% if gap > 0 %}
+                                        <span class="bg-red-100 text-red-800 text-xs font-medium px-2.5 py-0.5 rounded">
+                                            Gap: {{ gap }}
+                                        </span>
+                                    {% elif gap < 0 %}
+                                        <span class="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded">
+                                            Exceeds by: {{ -gap }}
+                                        </span>
+                                    {% else %}
+                                        <span class="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded">
+                                            Meets requirement
+                                        </span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="bg-gray-100 rounded-lg p-8 text-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                </svg>
+                <h3 class="text-lg font-semibold text-gray-600 mb-2">No Assessment Data</h3>
+                <p class="text-gray-500 mb-4">This employee hasn't been assessed yet.</p>
+                <a href="{{ url_for('assessments.create', employee_id=employee.id) }}" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded">
+                    Create First Assessment
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{% if labels %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-chart-radial-gauge"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const ctx = document.getElementById('radar-chart').getContext('2d');
+        
+        const data = {
+            labels: {{ labels | tojson }},
+            datasets: [
+                {
+                    label: 'Current Level',
+                    data: {{ current_data | tojson }},
+                    fill: true,
+                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                    borderColor: 'rgb(54, 162, 235)',
+                    pointBackgroundColor: 'rgb(54, 162, 235)',
+                    pointBorderColor: '#fff',
+                    pointHoverBackgroundColor: '#fff',
+                    pointHoverBorderColor: 'rgb(54, 162, 235)'
+                },
+                {
+                    label: 'Required Level',
+                    data: {{ required_data | tojson }},
+                    fill: true,
+                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                    borderColor: 'rgb(255, 99, 132)',
+                    pointBackgroundColor: 'rgb(255, 99, 132)',
+                    pointBorderColor: '#fff',
+                    pointHoverBackgroundColor: '#fff',
+                    pointHoverBorderColor: 'rgb(255, 99, 132)'
+                }
+            ]
+        };
+        
+        const radarChart = new Chart(ctx, {
+            type: 'radar',
+            data: data,
+            options: {
+                elements: {
+                    line: {
+                        borderWidth: 3
+                    }
+                },
+                scales: {
+                    r: {
+                        angleLines: {
+                            display: true
+                        },
+                        suggestedMin: 0,
+                        suggestedMax: 5
+                    }
+                }
+            }
+        });
+    });
+</script>
+{% endif %}
+{% endblock %}

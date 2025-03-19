@@ -1,0 +1,132 @@
+{
+  "resources": [
+    {
+      "id": 1,
+      "name": "Introduction to Programming",
+      "description": "Basic concepts of programming and software development.",
+      "resource_type": "Online Course",
+      "url": "#",
+      "competency_id": 1
+    },
+    {
+      "id": 2,
+      "name": "Advanced Software Development Practices",
+      "description": "Best practices for professional software development.",
+      "resource_type": "Workshop",
+      "url": "#",
+      "competency_id": 1
+    },
+    {
+      "id": 3,
+      "name": "Data Analysis with Python",
+      "description": "Learn to analyze data using Python libraries.",
+      "resource_type": "Online Course",
+      "url": "#",
+      "competency_id": 2
+    },
+    {
+      "id": 4,
+      "name": "UI/UX Design Fundamentals",
+      "description": "Core principles of designing user interfaces and experiences.",
+      "resource_type": "Online Course",
+      "url": "#",
+      "competency_id": 3
+    },
+    {
+      "id": 5,
+      "name": "Project Management Certification",
+      "description": "Preparation for industry standard project management certification.",
+      "resource_type": "Certification",
+      "url": "#",
+      "competency_id": 4
+    },
+    {
+      "id": 6,
+      "name": "Information Security Basics",
+      "description": "Introduction to cybersecurity principles and practices.",
+      "resource_type": "Online Course",
+      "url": "#",
+      "competency_id": 5
+    },
+    {
+      "id": 7,
+      "name": "Advanced Database Design",
+      "description": "Complex database modeling and optimization.",
+      "resource_type": "Workshop",
+      "url": "#",
+      "competency_id": 6
+    },
+    {
+      "id": 8,
+      "name": "Software Testing Techniques",
+      "description": "Comprehensive guide to different testing methodologies.",
+      "resource_type": "Online Course",
+      "url": "#",
+      "competency_id": 7
+    },
+    {
+      "id": 9,
+      "name": "DevOps Pipeline Implementation",
+      "description": "Setting up and managing CI/CD pipelines.",
+      "resource_type": "Workshop",
+      "url": "#",
+      "competency_id": 8
+    },
+    {
+      "id": 10,
+      "name": "Problem Management in IT",
+      "description": "Strategies for effective problem identification and resolution.",
+      "resource_type": "Online Course",
+      "url": "#",
+      "competency_id": 9
+    },
+    {
+      "id": 11,
+      "name": "Network Infrastructure Planning",
+      "description": "Design and implementation of robust network architectures.",
+      "resource_type": "Workshop",
+      "url": "#",
+      "competency_id": 10
+    },
+    {
+      "id": 12,
+      "name": "Business Analysis Certification",
+      "description": "Preparation for business analysis certification.",
+      "resource_type": "Certification",
+      "url": "#",
+      "competency_id": 11
+    },
+    {
+      "id": 13,
+      "name": "Effective Technical Communication",
+      "description": "Improving communication skills in technical contexts.",
+      "resource_type": "Online Course",
+      "url": "#",
+      "competency_id": 12
+    },
+    {
+      "id": 14,
+      "name": "Machine Learning Fundamentals",
+      "description": "Basic concepts and techniques in machine learning.",
+      "resource_type": "Online Course",
+      "url": "#",
+      "competency_id": 13
+    },
+    {
+      "id": 15,
+      "name": "Cloud Services Implementation",
+      "description": "Deploying and managing cloud-based services.",
+      "resource_type": "Workshop",
+      "url": "#",
+      "competency_id": 14
+    },
+    {
+      "id": 16,
+      "name": "Mobile App Development Bootcamp",
+      "description": "Comprehensive training in mobile application development.",
+      "resource_type": "Bootcamp",
+      "url": "#",
+      "competency_id": 15
+    }
+  ]
+}
