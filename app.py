@@ -1,5 +1,8 @@
 from flask import Flask, render_template, redirect, url_for, flash, session
 from models.models import db, Department, Competency, JobRole, Employee
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from routes.job_roles import job_roles
 from routes.competencies import competencies
 from routes.employees import employees
