@@ -1,103 +1,77 @@
-{% extends "base.html" %}
+{% extends "layout.html" %}
 
 {% block title %}Competencies{% endblock %}
 
 {% block content %}
-<div class="container mx-auto px-4 py-8">
-    <div class="flex justify-between items-center mb-6">
-        <h1 class="text-2xl font-bold">Competencies</h1>
-        <a href="{{ url_for('competencies.create') }}" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded">
-            Create New Competency
-        </a>
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Competencies</h1>
+        <a href="{{ url_for('competencies.create') }}" class="btn btn-primary">Create Competency</a>
     </div>
 
-    <div class="bg-white shadow-md rounded-lg overflow-hidden">
-        <div class="p-4 border-b">
-            <input type="text" id="competency-search" placeholder="Search competencies..." 
-                  class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+    <div class="card">
+        <div class="card-body">
+            {% if competencies %}
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Category</th>
+                                <th>Behaviors Defined</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for competency in competencies %}
+                                <tr>
+                                    <td>{{ competency.id }}</td>
+                                    <td>{{ competency.name }}</td>
+                                    <td>{{ competency.category }}</td>
+                                    <td>{{ competency.behaviors|length }} / 5</td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <a href="{{ url_for('competencies.view', id=competency.id) }}" class="btn btn-sm btn-outline-primary">View</a>
+                                            <a href="{{ url_for('competencies.edit', id=competency.id) }}" class="btn btn-sm btn-outline-secondary">Edit</a>
+                                            <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteModal{{ competency.id }}">
+                                                Delete
+                                            </button>
+                                        </div>
+
+                                        <!-- Delete Modal for each competency -->
+                                        <div class="modal fade" id="deleteModal{{ competency.id }}" tabindex="-1" aria-labelledby="deleteModalLabel{{ competency.id }}" aria-hidden="true">
+                                            <div class="modal-dialog">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title" id="deleteModalLabel{{ competency.id }}">Confirm Delete</h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <p>Are you sure you want to delete the competency <strong>{{ competency.name }}</strong>?</p>
+                                                        <p class="text-danger">This action cannot be undone. All related data will also be deleted.</p>
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                                        <form action="{{ url_for('competencies.delete', id=competency.id) }}" method="POST">
+                                                            <button type="submit" class="btn btn-danger">Delete</button>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="alert alert-info" role="alert">
+                    No competencies found. Click the "Create Competency" button to add your first competency.
+                </div>
+            {% endif %}
         </div>
-        
-        <table class="min-w-full">
-            <thead class="bg-gray-100">
-                <tr>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Behaviors</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                </tr>
-            </thead>
-            <tbody class="divide-y divide-gray-200">
-                {% for competency in competencies %}
-                <tr class="competency-row">
-                    <td class="px-6 py-4 whitespace-nowrap font-medium competency-name">{{ competency.name }}</td>
-                    <td class="px-6 py-4 whitespace-nowrap">
-                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
-                            {% if competency.category == 'Technical' %}bg-blue-100 text-blue-800
-                            {% elif competency.category == 'Leadership' %}bg-purple-100 text-purple-800
-                            {% elif competency.category == 'Interpersonal' %}bg-green-100 text-green-800
-                            {% elif competency.category == 'Business' %}bg-yellow-100 text-yellow-800
-                            {% else %}bg-gray-100 text-gray-800{% endif %}">
-                            {{ competency.category }}
-                        </span>
-                    </td>
-                    <td class="px-6 py-4 competency-description">
-                        <div class="truncate max-w-xs">{{ competency.description }}</div>
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-center">{{ competency.behaviors|length }}/5</td>
-                    <td class="px-6 py-4 whitespace-nowrap">
-                        <a href="{{ url_for('competencies.view', id=competency.id) }}" class="text-blue-600 hover:text-blue-900 mr-4">View</a>
-                        <a href="{{ url_for('competencies.edit', id=competency.id) }}" class="text-blue-600 hover:text-blue-900">Edit</a>
-                    </td>
-                </tr>
-                {% endfor %}
-                
-                {% if not competencies %}
-                <tr>
-                    <td colspan="5" class="px-6 py-4 text-center text-gray-500">No competencies found. Create one to get started.</td>
-                </tr>
-                {% endif %}
-                
-                <!-- No results row (hidden by default) -->
-                <tr id="no-results-row" class="hidden">
-                    <td colspan="5" class="px-6 py-4 text-center text-gray-500">No competencies match your search.</td>
-                </tr>
-            </tbody>
-        </table>
     </div>
 </div>
-{% endblock %}
-
-{% block scripts %}
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const searchInput = document.getElementById('competency-search');
-        const competencyRows = document.querySelectorAll('.competency-row');
-        const noResultsRow = document.getElementById('no-results-row');
-        
-        searchInput.addEventListener('keyup', function() {
-            const searchTerm = this.value.toLowerCase();
-            let visibleCount = 0;
-            
-            competencyRows.forEach(row => {
-                const name = row.querySelector('.competency-name').textContent.toLowerCase();
-                const description = row.querySelector('.competency-description').textContent.toLowerCase();
-                
-                if (name.includes(searchTerm) || description.includes(searchTerm)) {
-                    row.classList.remove('hidden');
-                    visibleCount++;
-                } else {
-                    row.classList.add('hidden');
-                }
-            });
-            
-            // Show "no results" message if needed
-            if (visibleCount === 0 && competencyRows.length > 0) {
-                noResultsRow.classList.remove('hidden');
-            } else {
-                noResultsRow.classList.add('hidden');
-            }
-        });
-    });
-</script>
 {% endblock %}
