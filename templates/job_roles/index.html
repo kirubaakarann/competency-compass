@@ -1,0 +1,77 @@
+{% extends "layout.html" %}
+
+{% block title %}Job Roles{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Job Roles</h1>
+        <a href="{{ url_for('job_roles.create') }}" class="btn btn-primary">Create Job Role</a>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            {% if job_roles %}
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Title</th>
+                                <th>Description</th>
+                                <th>Required Competencies</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for job_role in job_roles %}
+                                <tr>
+                                    <td>{{ job_role.id }}</td>
+                                    <td>{{ job_role.title }}</td>
+                                    <td>{{ job_role.description[:50] + '...' if job_role.description and job_role.description|length > 50 else job_role.description or 'No description' }}</td>
+                                    <td>{{ job_role.role_competencies|length }}</td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <a href="{{ url_for('job_roles.show', id=job_role.id) }}" class="btn btn-sm btn-outline-primary">View</a>
+                                            <a href="{{ url_for('job_roles.edit', id=job_role.id) }}" class="btn btn-sm btn-outline-secondary">Edit</a>
+                                            <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteModal{{ job_role.id }}">
+                                                Delete
+                                            </button>
+                                        </div>
+
+                                        <!-- Delete Modal for each job role -->
+                                        <div class="modal fade" id="deleteModal{{ job_role.id }}" tabindex="-1" aria-labelledby="deleteModalLabel{{ job_role.id }}" aria-hidden="true">
+                                            <div class="modal-dialog">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title" id="deleteModalLabel{{ job_role.id }}">Confirm Delete</h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <p>Are you sure you want to delete the job role <strong>{{ job_role.title }}</strong>?</p>
+                                                        <p class="text-danger">This action cannot be undone. All related data will also be deleted.</p>
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                                        <form action="{{ url_for('job_roles.delete', id=job_role.id) }}" method="POST">
+                                                            <button type="submit" class="btn btn-danger">Delete</button>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="alert alert-info" role="alert">
+                    No job roles found. Click the "Create Job Role" button to add your first job role.
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
