@@ -19,18 +19,31 @@ def store():
     try:
         name = request.form['name']
         description = request.form['description']
-               
-        # Create new competency
+        
+        # If you're not collecting department_id in your form, you need to add a default
+        # Or modify your form to include a department selection
+        department_id = request.form.get('department_id')
+        
+        if not department_id:
+            # Either get the first department or set a default
+            first_department = Department.query.first()
+            if first_department:
+                department_id = first_department.id
+            else:
+                flash('No departments exist. Please create a department first.', 'error')
+                return redirect(url_for('competencies.create'))
+        
+        # Create new competency with department_id
         competency = Competency(
             name=name,
             description=description,
-
+            department_id=department_id
         )
         
         db.session.add(competency)
         db.session.flush()  # Get the ID of the new competency
         
-        # Add behaviors for each level
+        # Process behaviors for each level
         for level in range(1, 6):  # Levels 1-5
             behavior_desc = request.form.get(f'level{level}_behavior', '')
             if behavior_desc:
@@ -45,11 +58,11 @@ def store():
         flash('Competency created successfully!', 'success')
         return redirect(url_for('competencies.view', id=competency.id))
     
-    except SQLAlchemyError as e:
+    except Exception as e:
         db.session.rollback()
         flash(f'Error creating competency: {str(e)}', 'error')
         return redirect(url_for('competencies.create'))
-
+        
 @competencies.route('/<int:id>')
 def view(id):
     competency = Competency.query.get_or_404(id)
