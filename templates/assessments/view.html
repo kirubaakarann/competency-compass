@@ -7,7 +7,7 @@
     <div class="flex justify-between items-center mb-6">
         <h1 class="text-2xl font-bold">Assessment Details</h1>
         <div>
-            <a href="{{ url_for('employees.view', id=employee.id) }}" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded mr-2">
+            <a href="{{ url_for('employees.show', id=employee.id) }}" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded mr-2">
                 Back to Employee
             </a>
             <a href="{{ url_for('assessments.edit', id=assessment.id) }}" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded mr-2">
