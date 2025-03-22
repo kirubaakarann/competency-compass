@@ -29,11 +29,15 @@ def create():
     # Get potential assessors (all employees)
     assessors = Employee.query.all()
     
+    # Get current date
+    current_date = datetime.now().strftime('%Y-%m-%d')
+    
     return render_template('assessments/create.html', 
                           employee=employee,
                           job_role=job_role,
                           role_competencies=role_competencies,
-                          assessors=assessors)
+                          assessors=assessors,
+                          current_date=current_date)
 
 @assessments.route('/store', methods=['POST'])
 def store():
