@@ -101,7 +101,7 @@ def view(id):
             'rating': rating.rating,
             'evidence': rating.evidence,
             'required_level': role_competency_map.get(rating.competency_id, {}).required_level if rating.competency_id in role_competency_map else 0,
-            'weight': role_competency_map.get(rating.competency_id, {}).weight if rating.competency_id in role_competency_map else 0
+            'weight': getattr(role_competency_map.get(rating.competency_id), 'weight', 0) if rating.competency_id in role_competency_map else 0
         }
         competency_ratings.append(competency_info)
     
