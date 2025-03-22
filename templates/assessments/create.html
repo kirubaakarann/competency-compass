@@ -7,7 +7,7 @@
     <div class="flex justify-between items-center mb-6">
         <h1 class="text-2xl font-bold">Create New Assessment</h1>
         <div>
-            <a href="{{ url_for('employees.view', id=employee.id) }}" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded mr-2">
+            <a href="{{ url_for('employees.show', id=employee.id) }}" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded mr-2">
                 Cancel
             </a>
             <button type="submit" form="assessment-form" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded">
