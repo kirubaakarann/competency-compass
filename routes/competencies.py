@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash
-from models import Competency, CompetencyBehavior, db
+from models import Competency, CompetencyBehavior, Department, db
 from sqlalchemy.exc import SQLAlchemyError
 
 competencies = Blueprint('competencies', __name__)
@@ -12,7 +12,10 @@ def index():
 @competencies.route('/create')
 def create():
     categories = ['Technical', 'Leadership', 'Interpersonal', 'Business', 'Other']
-    return render_template('competencies/create.html', categories=categories)
+    departments = Department.query.all()
+    return render_template('competencies/create.html',
+                          categories=categories,
+                          departments=departments)
 
 @competencies.route('/store', methods=['POST'])
 def store():
