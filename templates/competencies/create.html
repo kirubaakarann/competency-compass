@@ -27,6 +27,16 @@
             </select>
         </div>
         
+        <div class="mb-3">
+            <label for="department_id" class="form-label">Department</label>
+            <select class="form-select" id="department_id" name="department_id" required>
+                <option value="">Select Department</option>
+                {% for department in departments %}
+                    <option value="{{ department.id }}">{{ department.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        
         <div id="behaviors-container">
             <h3 class="mt-4 mb-3">Competency Behaviors</h3>
             <p class="text-muted">Define behaviors that demonstrate this competency at different levels.</p>
