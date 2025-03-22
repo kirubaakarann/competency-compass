@@ -48,7 +48,7 @@ def generate(employee_id):
                 'current_level': employee_rating,
                 'required_level': rc.required_level,
                 'gap': rc.required_level - employee_rating,
-                'weight': rc.weight
+                'weight': getattr(rc, 'weight', 1)  # Default to 1 if weight doesn't exist
             }
             competency_gaps.append(gap)
     
