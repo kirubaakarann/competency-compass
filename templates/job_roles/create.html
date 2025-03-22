@@ -7,6 +7,11 @@
     <h1>Create New Job Role</h1>
     
     <form method="POST" action="{{ url_for('job_roles.store') }}">
+        <!-- Add CSRF token if you're using Flask-WTF -->
+        {% if csrf_token %}
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        {% endif %}
+        
         <div class="mb-3">
             <label for="title" class="form-label">Job Title</label>
             <input type="text" class="form-control" id="title" name="title" required>
@@ -19,19 +24,19 @@
         
         <div class="mb-3">
             <label class="form-label">Required Competencies</label>
-            <div class="card p-3">
-                {% if competencies %}
+            {% if competencies and competencies|length > 0 %}
+                <div class="card p-3">
                     {% for competency in competencies %}
                         <div class="mb-2 border-bottom pb-2">
                             <div class="form-check">
-                                <input class="form-check-input" type="checkbox" name="competencies[]" value="{{ competency.id }}" id="competency{{ competency.id }}">
+                                <input class="form-check-input" type="checkbox" name="competency_ids[]" value="{{ competency.id }}" id="competency{{ competency.id }}">
                                 <label class="form-check-label" for="competency{{ competency.id }}">
-                                    {{ competency.name }} ({{ competency.department.name }})
+                                    {{ competency.name }} ({{ competency.category }})
                                 </label>
                             </div>
                             <div class="ms-4 mt-2">
                                 <label for="level{{ competency.id }}" class="form-label">Required Level (1-5)</label>
-                                <select class="form-select" name="levels[{{ competency.id }}]" id="level{{ competency.id }}">
+                                <select class="form-select" name="required_levels[{{ competency.id }}]" id="level{{ competency.id }}">
                                     <option value="1">1 - Basic</option>
                                     <option value="2">2 - Intermediate</option>
                                     <option value="3" selected>3 - Proficient</option>
@@ -41,16 +46,18 @@
                             </div>
                         </div>
                     {% endfor %}
-                {% else %}
-                    <div class="alert alert-info">
-                        No competencies have been defined yet. Please create competencies first.
-                    </div>
-                {% endif %}
-            </div>
+                </div>
+            {% else %}
+                <div class="alert alert-info">
+                    No competencies have been defined yet. Please <a href="{{ url_for('competencies.create') }}">create competencies</a> first.
+                </div>
+            {% endif %}
         </div>
         
-        <button type="submit" class="btn btn-primary">Create Job Role</button>
-        <a href="{{ url_for('job_roles.index') }}" class="btn btn-secondary">Cancel</a>
+        <div class="mt-4">
+            <button type="submit" class="btn btn-primary" {% if not competencies or competencies|length == 0 %}disabled{% endif %}>Create Job Role</button>
+            <a href="{{ url_for('job_roles.index') }}" class="btn btn-secondary">Cancel</a>
+        </div>
     </form>
 </div>
 {% endblock %}
