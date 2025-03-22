@@ -19,13 +19,12 @@ def store():
     try:
         name = request.form['name']
         description = request.form['description']
-        category = request.form['category']
-        
+               
         # Create new competency
         competency = Competency(
             name=name,
             description=description,
-            category=category
+
         )
         
         db.session.add(competency)
@@ -86,7 +85,7 @@ def update(id):
         
         competency.name = request.form['name']
         competency.description = request.form['description']
-        competency.category = request.form['category']
+     
         
         # Update or create behaviors for each level
         for level in range(1, 6):  # Levels 1-5
