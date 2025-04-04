@@ -157,3 +157,7 @@ def _generate_competency_recommendations(employee, competency):
     
     recommendations_str = response.choices[0].message.content
     return json.loads(recommendations_str)
+
+@ai_recommendations.route('/')
+def index():
+    return render_template('ai_recommendations/index.html')
