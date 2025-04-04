@@ -13,11 +13,10 @@ def generate_recommendations(employee_id):
     job_role = employee.job_role
     
     # Get assessments and competencies for this employee and job role
-assessments = Assessment.query.filter_by(employee_id=employee_id).all()
+    assessments = Assessment.query.filter_by(employee_id=employee_id).all()
 
-    
     # Calculate competency gaps
-competency_gaps = []
+    competency_gaps = []
     for competency in job_role.competencies:
         assessment = next((a for a in assessments if a.competency_id == competency.id), None)
         
@@ -33,7 +32,7 @@ competency_gaps = []
                     'required_level': required_level,
                     'gap': required_level - current_level
                 })
-    
+
     # Sort gaps by size (largest gaps first)
     competency_gaps.sort(key=lambda x: x['gap'], reverse=True)
     
