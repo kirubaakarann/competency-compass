@@ -17,7 +17,7 @@ assessments = Assessment.query.filter_by(employee_id=employee_id).all()
 
     
     # Calculate competency gaps
-    competency_gaps = []
+competency_gaps = []
     for competency in job_role.competencies:
         assessment = next((a for a in assessments if a.competency_id == competency.id), None)
         
