@@ -4,6 +4,11 @@ from sqlalchemy.exc import SQLAlchemyError
 
 job_roles = Blueprint('job_roles', __name__)
 
+@job_roles.route('/<int:id>')
+def show(id):
+    job_role = JobRole.query.get_or_404(id)
+    return render_template('job_roles/view.html', job_role=job_role)
+
 @job_roles.route('/')
 def index():
     job_roles = JobRole.query.all()
