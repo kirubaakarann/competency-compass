@@ -1,6 +1,5 @@
 from flask import Blueprint, render_template, jsonify, current_app
-from models import Employee, JobRole, Competency, Assessment
-from models import RoleCompetency
+from models import Employee, JobRole, Competency, Assessment, RoleCompetency
 from extensions import db
 import openai
 import json
@@ -12,32 +11,29 @@ def generate_recommendations(employee_id):
     # Fetch employee with related data
     employee = Employee.query.get_or_404(employee_id)
     job_role = employee.job_role
-
-    # Get role-competency links
-    role_competencies = RoleCompetency.query.filter_by(job_role_id=job_role.id).all()
     
     # Get assessments and competencies for this employee and job role
-    assessments = Assessment.query.filter_by(employee_id=employee_id).all()
+assessments = Assessment.query.filter_by(employee_id=employee_id).all()
 
+    
     # Calculate competency gaps
-competency_gaps = []
-for rc in role_competencies:
-    competency = rc.competency
-    assessment = next((a for a in assessments if a.competency_id == competency.id), None)
-
-    if assessment:
-        current_level = assessment.current_level
-        required_level = competency.required_level
-
-        if current_level < required_level:
-            competency_gaps.append({
-                'competency_id': competency.id,
-                'competency_name': competency.name,
-                'current_level': current_level,
-                'required_level': required_level,
-                'gap': required_level - current_level
-            })
-
+    competency_gaps = []
+    for competency in job_role.competencies:
+        assessment = next((a for a in assessments if a.competency_id == competency.id), None)
+        
+        if assessment:
+            current_level = assessment.current_level
+            required_level = competency.required_level
+            
+            if current_level < required_level:
+                competency_gaps.append({
+                    'competency_id': competency.id,
+                    'competency_name': competency.name,
+                    'current_level': current_level,
+                    'required_level': required_level,
+                    'gap': required_level - current_level
+                })
+    
     # Sort gaps by size (largest gaps first)
     competency_gaps.sort(key=lambda x: x['gap'], reverse=True)
     
