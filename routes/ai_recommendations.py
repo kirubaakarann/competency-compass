@@ -13,10 +13,8 @@ def generate_recommendations(employee_id):
     job_role = employee.job_role
     
     # Get assessments and competencies for this employee and job role
-    assessments = Assessment.query.filter_by(
-        employee_id=employee_id, 
-        job_role_id=job_role.id
-    ).all()
+assessments = Assessment.query.filter_by(employee_id=employee_id).all()
+
     
     # Calculate competency gaps
     competency_gaps = []
